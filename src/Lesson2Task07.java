@@ -1,4 +1,4 @@
-public class Lesson2Task7 {
+public class Lesson2Task07 {
     public static void main(String[] args) {
         System.out.println(isNegative(-5));
         System.out.println(isNegative(3));

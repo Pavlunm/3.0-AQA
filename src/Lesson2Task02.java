@@ -1,4 +1,4 @@
-public class Lesson2Task2 {
+public class Lesson2Task02 {
     public static void main(String[] args) {
         checkSumSign();
     }

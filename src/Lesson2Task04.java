@@ -1,4 +1,4 @@
-public class Lesson2Task4 {
+public class Lesson2Task04 {
     public static void main(String[] args) {
         compareNumbers();
     }

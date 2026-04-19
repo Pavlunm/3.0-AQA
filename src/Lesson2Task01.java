@@ -1,4 +1,4 @@
-public class Lesson2Task1 {
+public class Lesson2Task01 {
     public static void main(String[] args) {
         printThreeWords();
     }

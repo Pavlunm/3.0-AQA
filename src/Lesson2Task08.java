@@ -1,4 +1,4 @@
-public class Lesson2Task8 {
+public class Lesson2Task08 {
     public static void main(String[] args) {
         printStringNTimes("Привет!", 3);
     }

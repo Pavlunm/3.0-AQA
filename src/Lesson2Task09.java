@@ -1,4 +1,4 @@
-public class Lesson2Task9 {
+public class Lesson2Task09 {
     public static void main(String[] args) {
         System.out.println(isLeapYear(2024));
         System.out.println(isLeapYear(2023));

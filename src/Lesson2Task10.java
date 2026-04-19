@@ -4,7 +4,6 @@ public class Lesson2Task10 {
         invertArray(array);
         printArray(array);
     }
-
     public static void invertArray(int[] array) {
         for (int i = 0; i < array.length; i++) {
             if (array[i] == 0) {
@@ -14,7 +13,6 @@ public class Lesson2Task10 {
             }
         }
     }
-
     public static void printArray(int[] array) {
         for (int i = 0; i < array.length; i++) {
             System.out.print(array[i] + " ");

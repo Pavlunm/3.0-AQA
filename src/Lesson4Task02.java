@@ -4,23 +4,23 @@ public class Lesson4Task02 {
         Shape rectangle = new Rectangle("yellow", "blue", 8, 5);
         Shape triangle = new Triangle("gray", "green", 3, 4, 5);
 
-        System.out.println("CIRCLE");
-        System.out.println("Perimeter: " + circle.perimeter());
-        System.out.println("Area: " + circle.area());
-        System.out.println("Fill color: " + circle.getFillColor());
-        System.out.println("Border color: " + circle.getBorderColor());
+        System.out.println("КРУГ");
+        System.out.println("Периметр: " + circle.perimeter());
+        System.out.println("Площадь: " + circle.area());
+        System.out.println("Цвет фона: " + circle.getFillColor());
+        System.out.println("Цвет границ: " + circle.getBorderColor());
 
-        System.out.println("RECTANGLE");
-        System.out.println("Perimeter: " + rectangle.perimeter());
-        System.out.println("Area: " + rectangle.area());
-        System.out.println("Fill color: " + rectangle.getFillColor());
-        System.out.println("Border color: " + rectangle.getBorderColor());
+        System.out.println("ПРЯМОУГОЛЬНИК");
+        System.out.println("Периметр: " + rectangle.perimeter());
+        System.out.println("Площадь: " + rectangle.area());
+        System.out.println("Цвет фона: " + rectangle.getFillColor());
+        System.out.println("Цвет границ: " + rectangle.getBorderColor());
 
-        System.out.println("TRIANGLE");
-        System.out.println("Perimeter: " + triangle.perimeter());
-        System.out.println("Area: " + triangle.area());
-        System.out.println("Fill color: " + triangle.getFillColor());
-        System.out.println("Border color: " + triangle.getBorderColor());
+        System.out.println("ТРЕУГОЛЬНИК");
+        System.out.println("Периметр: " + triangle.perimeter());
+        System.out.println("Площадь: " + triangle.area());
+        System.out.println("Цвет фона: " + triangle.getFillColor());
+        System.out.println("Цвет границ: " + triangle.getBorderColor());
     }
 }
 

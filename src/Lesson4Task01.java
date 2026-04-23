@@ -5,12 +5,12 @@ public class Lesson4Task01 {
         Cat cat2 = new Cat("Murka", 20);
         Cat cat3 = new Cat("Luna", 12);
 
-        System.out.println("Animals: " + Animal.count);
-        System.out.println("Dogs: " + Dog.count);
-        System.out.println("Cats: " + Cat.count);
+        System.out.println("Животных: " + Animal.count);
+        System.out.println("Собак: " + Dog.count);
+        System.out.println("Котов: " + Cat.count);
         System.out.println();
 
-        System.out.println("Run/Swim:");
+        System.out.println("Бег и плавание:");
         dog.run(300);
         dog.run(700);
         dog.swim(5);
@@ -23,13 +23,13 @@ public class Lesson4Task01 {
         System.out.println();
 
         Bowl bowl = new Bowl(20);
-        System.out.println("Food in bowl: " + bowl.getFoodAmount());
+        System.out.println("Еда в миске: " + bowl.getFoodAmount());
 
         cat1.eat(bowl);
         cat2.eat(bowl);
         cat3.eat(bowl);
 
-        System.out.println("Satiety 1:");
+        System.out.println("Сытость после первого кормления:");
         System.out.println(cat1.name + ": " + cat1.isSatiety());
         System.out.println(cat2.name + ": " + cat2.isSatiety());
         System.out.println(cat3.name + ": " + cat3.isSatiety());
@@ -37,13 +37,13 @@ public class Lesson4Task01 {
         System.out.println();
 
         bowl.addFood(30);
-        System.out.println("Food after add: " + bowl.getFoodAmount());
+        System.out.println("Еда после добавления: " + bowl.getFoodAmount());
 
         cat1.eat(bowl);
         cat2.eat(bowl);
         cat3.eat(bowl);
 
-        System.out.println("Satiety 2:");
+        System.out.println("Сытость после второго кормления:");
         System.out.println(cat1.name + ": " + cat1.isSatiety());
         System.out.println(cat2.name + ": " + cat2.isSatiety());
         System.out.println(cat3.name + ": " + cat3.isSatiety());
@@ -65,22 +65,22 @@ class Animal {
 
     public void run(int distance) {
         if (distance <= maxRunDistance) {
-            System.out.println(name + " run " + distance);
+            System.out.println(name + " пробежал(а) " + distance + " м");
         } else {
-            System.out.println(name + " no run " + distance);
+            System.out.println(name + " не может пробежать " + distance + " м");
         }
     }
 
     public void swim(int distance) {
         if (maxSwimDistance == 0) {
-            System.out.println(name + " no swim");
+            System.out.println(name + " не умеет плавать");
             return;
         }
 
         if (distance <= maxSwimDistance) {
-            System.out.println(name + " swim " + distance);
+            System.out.println(name + " проплыл(а) " + distance + " м");
         } else {
-            System.out.println(name + " no swim " + distance);
+            System.out.println(name + " не может проплыть " + distance + " м");
         }
     }
 }
@@ -112,15 +112,15 @@ class Cat extends Animal {
 
     public void eat(Bowl bowl) {
         if (satiety) {
-            System.out.println(name + " full");
+            System.out.println(name + " уже сыт(а)");
             return;
         }
 
         if (bowl.takeFood(appetite)) {
             satiety = true;
-            System.out.println(name + " ate " + appetite);
+            System.out.println(name + " съел(а) " + appetite);
         } else {
-            System.out.println(name + " no food");
+            System.out.println(name + " не поел(а), мало еды");
         }
     }
 }

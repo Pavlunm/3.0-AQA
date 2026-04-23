@@ -1,6 +1,3 @@
-import java.util.ArrayList;
-import java.util.List;
-
 public class Lesson4Task01 {
     public static void main(String[] args) {
         Dog dog = new Dog("Rex");
@@ -8,6 +5,7 @@ public class Lesson4Task01 {
         Cat cat2 = new Cat("Murka", 20);
         Cat cat3 = new Cat("Luna", 12);
 
+        System.out.println("Run and swim:");
         dog.run(300);
         dog.run(700);
         dog.swim(5);
@@ -17,41 +15,40 @@ public class Lesson4Task01 {
         cat1.run(250);
         cat1.swim(1);
 
+        System.out.println();
         Bowl bowl = new Bowl(20);
-        List<Cat> cats = new ArrayList<>();
-        cats.add(cat1);
-        cats.add(cat2);
-        cats.add(cat3);
+        Cat[] cats = {cat1, cat2, cat3};
 
         System.out.println("Bowl food before feeding: " + bowl.getFoodAmount());
-        feedAllCats(cats, bowl);
-        printCatsSatiety(cats);
+        for (int i = 0; i < cats.length; i++) {
+            cats[i].eat(bowl);
+        }
 
+        System.out.println("Cats satiety after first feeding:");
+        for (int i = 0; i < cats.length; i++) {
+            System.out.println(cats[i].getName() + ": " + cats[i].isSatiety());
+        }
+
+        System.out.println();
         bowl.addFood(30);
         System.out.println("Bowl food after refill: " + bowl.getFoodAmount());
-        feedAllCats(cats, bowl);
-        printCatsSatiety(cats);
-    }
-
-    private static void feedAllCats(List<Cat> cats, Bowl bowl) {
-        for (Cat cat : cats) {
-            cat.eat(bowl);
+        for (int i = 0; i < cats.length; i++) {
+            cats[i].eat(bowl);
         }
-    }
 
-    private static void printCatsSatiety(List<Cat> cats) {
-        for (Cat cat : cats) {
-            System.out.println(cat.getName() + " satiety: " + cat.isSatiety());
+        System.out.println("Cats satiety after second feeding:");
+        for (int i = 0; i < cats.length; i++) {
+            System.out.println(cats[i].getName() + ": " + cats[i].isSatiety());
         }
     }
 }
 
-abstract class Animal {
-    private final String name;
-    private final int maxRunDistance;
-    private final int maxSwimDistance;
+class Animal {
+    String name;
+    int maxRunDistance;
+    int maxSwimDistance;
 
-    protected Animal(String name, int maxRunDistance, int maxSwimDistance) {
+    public Animal(String name, int maxRunDistance, int maxSwimDistance) {
         this.name = name;
         this.maxRunDistance = maxRunDistance;
         this.maxSwimDistance = maxSwimDistance;
@@ -90,7 +87,7 @@ class Dog extends Animal {
 }
 
 class Cat extends Animal {
-    private final int appetite;
+    private int appetite;
     private boolean satiety;
 
     public Cat(String name, int appetite) {
@@ -111,7 +108,7 @@ class Cat extends Animal {
 
         if (bowl.takeFood(appetite)) {
             satiety = true;
-            System.out.println(getName() + " ate " + appetite + " food");
+            System.out.println(getName() + " ate " + appetite);
         } else {
             System.out.println(getName() + " cannot eat, not enough food");
         }

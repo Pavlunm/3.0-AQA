@@ -9,12 +9,11 @@ public class Lesson4Task02 {
         );
 
         for (Shape shape : shapes) {
-            System.out.println(
-                    "Perimeter=" + round(shape.perimeter())
-                            + ", Area=" + round(shape.area())
-                            + ", FillColor=" + shape.getFillColor()
-                            + ", BorderColor=" + shape.getBorderColor()
-            );
+            System.out.println("Perimeter: " + round(shape.perimeter()));
+            System.out.println("Area: " + round(shape.area()));
+            System.out.println("Fill color: " + shape.getFillColor());
+            System.out.println("Border color: " + shape.getBorderColor());
+            System.out.println("-----");
         }
     }
 
@@ -33,13 +32,25 @@ interface Shape {
     String getBorderColor();
 }
 
-abstract class BaseShape implements Shape {
-    private final String fillColor;
-    private final String borderColor;
+class Circle implements Shape {
+    private String fillColor;
+    private String borderColor;
+    private double radius;
 
-    protected BaseShape(String fillColor, String borderColor) {
+    public Circle(String fillColor, String borderColor, double radius) {
         this.fillColor = fillColor;
         this.borderColor = borderColor;
+        this.radius = radius;
+    }
+
+    @Override
+    public double perimeter() {
+        return 2 * Math.PI * radius;
+    }
+
+    @Override
+    public double area() {
+        return Math.PI * radius * radius;
     }
 
     @Override
@@ -53,31 +64,15 @@ abstract class BaseShape implements Shape {
     }
 }
 
-class Circle extends BaseShape {
-    private final double radius;
-
-    public Circle(String fillColor, String borderColor, double radius) {
-        super(fillColor, borderColor);
-        this.radius = radius;
-    }
-
-    @Override
-    public double perimeter() {
-        return 2 * Math.PI * radius;
-    }
-
-    @Override
-    public double area() {
-        return Math.PI * radius * radius;
-    }
-}
-
-class Rectangle extends BaseShape {
-    private final double width;
-    private final double height;
+class Rectangle implements Shape {
+    private String fillColor;
+    private String borderColor;
+    private double width;
+    private double height;
 
     public Rectangle(String fillColor, String borderColor, double width, double height) {
-        super(fillColor, borderColor);
+        this.fillColor = fillColor;
+        this.borderColor = borderColor;
         this.width = width;
         this.height = height;
     }
@@ -91,15 +86,28 @@ class Rectangle extends BaseShape {
     public double area() {
         return width * height;
     }
+
+    @Override
+    public String getFillColor() {
+        return fillColor;
+    }
+
+    @Override
+    public String getBorderColor() {
+        return borderColor;
+    }
 }
 
-class Triangle extends BaseShape {
-    private final double a;
-    private final double b;
-    private final double c;
+class Triangle implements Shape {
+    private String fillColor;
+    private String borderColor;
+    private double a;
+    private double b;
+    private double c;
 
     public Triangle(String fillColor, String borderColor, double a, double b, double c) {
-        super(fillColor, borderColor);
+        this.fillColor = fillColor;
+        this.borderColor = borderColor;
         this.a = a;
         this.b = b;
         this.c = c;
@@ -114,5 +122,15 @@ class Triangle extends BaseShape {
     public double area() {
         double p = perimeter() / 2.0;
         return Math.sqrt(p * (p - a) * (p - b) * (p - c));
+    }
+
+    @Override
+    public String getFillColor() {
+        return fillColor;
+    }
+
+    @Override
+    public String getBorderColor() {
+        return borderColor;
     }
 }

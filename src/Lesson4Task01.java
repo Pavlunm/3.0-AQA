@@ -21,9 +21,10 @@ public class Lesson4Task01 {
         cat1.swim(1);
 
         System.out.println();
-        Bowl bowl = new Bowl(20);
 
+        Bowl bowl = new Bowl(20);
         System.out.println("Food in bowl: " + bowl.getFoodAmount());
+
         cat1.eat(bowl);
         cat2.eat(bowl);
         cat3.eat(bowl);
@@ -34,8 +35,10 @@ public class Lesson4Task01 {
         System.out.println(cat3.name + ": " + cat3.isSatiety());
 
         System.out.println();
+
         bowl.addFood(30);
         System.out.println("Food after add: " + bowl.getFoodAmount());
+
         cat1.eat(bowl);
         cat2.eat(bowl);
         cat3.eat(bowl);

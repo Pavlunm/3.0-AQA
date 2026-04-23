@@ -5,7 +5,12 @@ public class Lesson4Task01 {
         Cat cat2 = new Cat("Murka", 20);
         Cat cat3 = new Cat("Luna", 12);
 
-        System.out.println("Run and swim:");
+        System.out.println("Animals: " + Animal.count);
+        System.out.println("Dogs: " + Dog.count);
+        System.out.println("Cats: " + Cat.count);
+        System.out.println();
+
+        System.out.println("Run/Swim:");
         dog.run(300);
         dog.run(700);
         dog.swim(5);
@@ -17,81 +22,83 @@ public class Lesson4Task01 {
 
         System.out.println();
         Bowl bowl = new Bowl(20);
-        Cat[] cats = {cat1, cat2, cat3};
 
-        System.out.println("Bowl food before feeding: " + bowl.getFoodAmount());
-        for (int i = 0; i < cats.length; i++) {
-            cats[i].eat(bowl);
-        }
+        System.out.println("Food in bowl: " + bowl.getFoodAmount());
+        cat1.eat(bowl);
+        cat2.eat(bowl);
+        cat3.eat(bowl);
 
-        System.out.println("Cats satiety after first feeding:");
-        for (int i = 0; i < cats.length; i++) {
-            System.out.println(cats[i].getName() + ": " + cats[i].isSatiety());
-        }
+        System.out.println("Satiety 1:");
+        System.out.println(cat1.name + ": " + cat1.isSatiety());
+        System.out.println(cat2.name + ": " + cat2.isSatiety());
+        System.out.println(cat3.name + ": " + cat3.isSatiety());
 
         System.out.println();
         bowl.addFood(30);
-        System.out.println("Bowl food after refill: " + bowl.getFoodAmount());
-        for (int i = 0; i < cats.length; i++) {
-            cats[i].eat(bowl);
-        }
+        System.out.println("Food after add: " + bowl.getFoodAmount());
+        cat1.eat(bowl);
+        cat2.eat(bowl);
+        cat3.eat(bowl);
 
-        System.out.println("Cats satiety after second feeding:");
-        for (int i = 0; i < cats.length; i++) {
-            System.out.println(cats[i].getName() + ": " + cats[i].isSatiety());
-        }
+        System.out.println("Satiety 2:");
+        System.out.println(cat1.name + ": " + cat1.isSatiety());
+        System.out.println(cat2.name + ": " + cat2.isSatiety());
+        System.out.println(cat3.name + ": " + cat3.isSatiety());
     }
 }
 
 class Animal {
-    String name;
+    static int count = 0;
+    public String name;
     int maxRunDistance;
     int maxSwimDistance;
 
     public Animal(String name, int maxRunDistance, int maxSwimDistance) {
+        count++;
         this.name = name;
         this.maxRunDistance = maxRunDistance;
         this.maxSwimDistance = maxSwimDistance;
     }
 
-    public String getName() {
-        return name;
-    }
-
     public void run(int distance) {
         if (distance <= maxRunDistance) {
-            System.out.println(name + " runs " + distance + " m");
+            System.out.println(name + " run " + distance);
         } else {
-            System.out.println(name + " cannot run " + distance + " m (max " + maxRunDistance + ")");
+            System.out.println(name + " no run " + distance);
         }
     }
 
     public void swim(int distance) {
         if (maxSwimDistance == 0) {
-            System.out.println(name + " cannot swim");
+            System.out.println(name + " no swim");
             return;
         }
 
         if (distance <= maxSwimDistance) {
-            System.out.println(name + " swims " + distance + " m");
+            System.out.println(name + " swim " + distance);
         } else {
-            System.out.println(name + " cannot swim " + distance + " m (max " + maxSwimDistance + ")");
+            System.out.println(name + " no swim " + distance);
         }
     }
 }
 
 class Dog extends Animal {
+    static int count = 0;
+
     public Dog(String name) {
         super(name, 500, 10);
+        count++;
     }
 }
 
 class Cat extends Animal {
+    static int count = 0;
     private int appetite;
     private boolean satiety;
 
     public Cat(String name, int appetite) {
         super(name, 200, 0);
+        count++;
         this.appetite = appetite;
         this.satiety = false;
     }
@@ -102,15 +109,15 @@ class Cat extends Animal {
 
     public void eat(Bowl bowl) {
         if (satiety) {
-            System.out.println(getName() + " is already full");
+            System.out.println(name + " full");
             return;
         }
 
         if (bowl.takeFood(appetite)) {
             satiety = true;
-            System.out.println(getName() + " ate " + appetite);
+            System.out.println(name + " ate " + appetite);
         } else {
-            System.out.println(getName() + " cannot eat, not enough food");
+            System.out.println(name + " no food");
         }
     }
 }

@@ -26,11 +26,8 @@ public class Lesson4Task02 {
 
 interface Shape {
     double perimeter();
-
     double area();
-
     String getFillColor();
-
     String getBorderColor();
 }
 
@@ -48,15 +45,12 @@ class Circle implements Shape {
     public double perimeter() {
         return 2 * Math.PI * radius;
     }
-
     public double area() {
         return Math.PI * radius * radius;
     }
-
     public String getFillColor() {
         return fillColor;
     }
-
     public String getBorderColor() {
         return borderColor;
     }
@@ -78,15 +72,12 @@ class Rectangle implements Shape {
     public double perimeter() {
         return 2 * (width + height);
     }
-
     public double area() {
         return width * height;
     }
-
     public String getFillColor() {
         return fillColor;
     }
-
     public String getBorderColor() {
         return borderColor;
     }
@@ -110,16 +101,13 @@ class Triangle implements Shape {
     public double perimeter() {
         return a + b + c;
     }
-
     public double area() {
         double p = perimeter() / 2.0;
         return Math.sqrt(p * (p - a) * (p - b) * (p - c));
     }
-
     public String getFillColor() {
         return fillColor;
     }
-
     public String getBorderColor() {
         return borderColor;
     }

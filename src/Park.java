@@ -14,7 +14,7 @@ public class Park {
     }
 
     public void printAttractions() {
-        System.out.println("Park: " + parkName);
+        System.out.println("Парк: " + parkName);
         for (Attraction attraction : attractions) {
             attraction.printInfo();
             System.out.println("-------------------------");
@@ -33,9 +33,9 @@ public class Park {
         }
 
         public void printInfo() {
-            System.out.println("Attraction: " + attractionName);
-            System.out.println("Opening hours: " + openingHours);
-            System.out.println("Ticket price: " + ticketPrice);
+            System.out.println("Аттракцион: " + attractionName);
+            System.out.println("Время работы: " + openingHours);
+            System.out.println("Цена билета: " + ticketPrice);
         }
     }
 }

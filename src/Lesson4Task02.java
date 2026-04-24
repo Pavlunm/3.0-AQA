@@ -1,8 +1,8 @@
 public class Lesson4Task02 {
     public static void main(String[] args) {
-        Shape circle = new Circle("white", "black", 10);
-        Shape rectangle = new Rectangle("yellow", "blue", 8, 5);
-        Shape triangle = new Triangle("gray", "green", 3, 4, 5);
+        Shape circle = new Circle("белый", "черный", 10);
+        Shape rectangle = new Rectangle("желтый", "синий", 8, 5);
+        Shape triangle = new Triangle("серый", "зеленый", 3, 4, 5);
 
         System.out.println("КРУГ");
         System.out.println("Периметр: " + circle.perimeter());

@@ -1,22 +1,22 @@
-import org.junit.jupiter.api.Test;
+import org.testng.annotations.Test;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertTrue;
 
-class Lesson7Task04Test {
+public class Lesson7Task04Test {
 
     @Test
-    void lessThan() {
+    public void lessThan() {
         assertTrue(Lesson7Task04.compare(1, 2) < 0);
     }
 
     @Test
-    void greaterThan() {
+    public void greaterThan() {
         assertTrue(Lesson7Task04.compare(3, 2) > 0);
     }
 
     @Test
-    void equal() {
-        assertEquals(0, Lesson7Task04.compare(5, 5));
+    public void equal() {
+        assertEquals(Lesson7Task04.compare(5, 5), 0);
     }
 }

@@ -1,32 +1,31 @@
-import org.junit.jupiter.api.Test;
+import org.testng.annotations.Test;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.testng.Assert.assertEquals;
 
-class Lesson7Task03Test {
+public class Lesson7Task03Test {
 
     @Test
-    void add() {
-        assertEquals(7, Lesson7Task03.add(3, 4));
+    public void add() {
+        assertEquals(Lesson7Task03.add(3, 4), 7);
     }
 
     @Test
-    void subtract() {
-        assertEquals(-1, Lesson7Task03.subtract(3, 4));
+    public void subtract() {
+        assertEquals(Lesson7Task03.subtract(3, 4), -1);
     }
 
     @Test
-    void multiply() {
-        assertEquals(12, Lesson7Task03.multiply(3, 4));
+    public void multiply() {
+        assertEquals(Lesson7Task03.multiply(3, 4), 12);
     }
 
     @Test
-    void divide() {
-        assertEquals(2, Lesson7Task03.divide(7, 3));
+    public void divide() {
+        assertEquals(Lesson7Task03.divide(7, 3), 2);
     }
 
-    @Test
-    void divideByZeroThrows() {
-        assertThrows(ArithmeticException.class, () -> Lesson7Task03.divide(1, 0));
+    @Test(expectedExceptions = ArithmeticException.class)
+    public void divideByZeroThrows() {
+        Lesson7Task03.divide(1, 0);
     }
 }

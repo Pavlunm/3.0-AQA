@@ -1,27 +1,26 @@
-import org.junit.jupiter.api.Test;
+import org.testng.annotations.Test;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.testng.Assert.assertEquals;
 
-class Lesson7Task01Test {
+public class Lesson7Task01Test {
 
     @Test
-    void factorialOfZeroIsOne() {
-        assertEquals(1, Lesson7Task01.factorial(0));
+    public void factorialOfZeroIsOne() {
+        assertEquals(Lesson7Task01.factorial(0), 1L);
     }
 
     @Test
-    void factorialOfFive() {
-        assertEquals(120, Lesson7Task01.factorial(5));
+    public void factorialOfFive() {
+        assertEquals(Lesson7Task01.factorial(5), 120L);
     }
 
     @Test
-    void factorialOfOne() {
-        assertEquals(1, Lesson7Task01.factorial(1));
+    public void factorialOfOne() {
+        assertEquals(Lesson7Task01.factorial(1), 1L);
     }
 
-    @Test
-    void factorialNegativeThrows() {
-        assertThrows(IllegalArgumentException.class, () -> Lesson7Task01.factorial(-1));
+    @Test(expectedExceptions = IllegalArgumentException.class)
+    public void factorialNegativeThrows() {
+        Lesson7Task01.factorial(-1);
     }
 }

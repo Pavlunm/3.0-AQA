@@ -43,7 +43,6 @@ public class Lesson5Task01 {
     }
 
     public static int sumArray(String[][] array) throws MyArraySizeException, MyArrayDataException {
-        // В этом задании ждем только массив 4x4
         if (array.length != 4) {
             throw new MyArraySizeException("Ожидается 4 строки, получено: " + array.length);
         }

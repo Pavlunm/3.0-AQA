@@ -11,20 +11,20 @@ public class Lesson6Task01 {
 
     public static void main(String[] args) {
         List<Student> students = new ArrayList<>();
-        students.add(new Student("Иванов", "ИС-101", 2, Map.of("Математика", 4, "Физика", 5)));
-        students.add(new Student("Петров", "ИС-101", 2, Map.of("Математика", 2, "Физика", 2)));
-        students.add(new Student("Сидоров", "ИС-102", 1, Map.of("Математика", 3, "Физика", 4)));
+        students.add(new Student("Иванов", "ПИ-21", 2, Map.of("Математика", 4, "Физика", 5)));
+        students.add(new Student("Петров", "ПИ-21", 2, Map.of("Математика", 2, "Физика", 2)));
+        students.add(new Student("Сидоров", "КН-33", 1, Map.of("Математика", 3, "Физика", 4)));
 
         System.out.println("До удаления со средним < 3:");
-        students.forEach(System.out::println);
+        printLastNamesLine(students);
 
         removeStudentsWithLowAverage(students);
         System.out.println("\nПосле удаления со средним < 3:");
-        students.forEach(System.out::println);
+        printLastNamesLine(students);
 
         promoteStudentsWithSufficientAverage(students);
         System.out.println("\nПосле перевода на следующий курс (средний >= 3):");
-        students.forEach(System.out::println);
+        printLastNamesLine(students);
 
         Set<Student> studentSet = new HashSet<>(students);
         System.out.println("\nСтуденты 2 курса:");
@@ -46,32 +46,38 @@ public class Lesson6Task01 {
     public static void printStudents(Set<Student> students, int course) {
         for (Student student : students) {
             if (student.getCourse() == course) {
-                System.out.println(student.getName());
+                System.out.println(student.getLastName());
             }
+        }
+    }
+
+    private static void printLastNamesLine(Collection<Student> students) {
+        for (Student student : students) {
+            System.out.println(student.getLastName());
         }
     }
 }
 
 class Student {
 
-    private String name;
+    private String lastName;
     private String group;
     private int course;
     private final Map<String, Integer> gradesBySubject;
 
-    public Student(String name, String group, int course, Map<String, Integer> gradesBySubject) {
-        this.name = name;
+    public Student(String lastName, String group, int course, Map<String, Integer> gradesBySubject) {
+        this.lastName = lastName;
         this.group = group;
         this.course = course;
         this.gradesBySubject = new HashMap<>(gradesBySubject);
     }
 
-    public String getName() {
-        return name;
+    public String getLastName() {
+        return lastName;
     }
 
-    public void setName(String name) {
-        this.name = name;
+    public void setLastName(String lastName) {
+        this.lastName = lastName;
     }
 
     public String getGroup() {
@@ -115,24 +121,18 @@ class Student {
         }
         Student student = (Student) o;
         return course == student.course
-                && Objects.equals(name, student.name)
+                && Objects.equals(lastName, student.lastName)
                 && Objects.equals(group, student.group)
                 && Objects.equals(gradesBySubject, student.gradesBySubject);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(name, group, course, gradesBySubject);
+        return Objects.hash(lastName, group, course, gradesBySubject);
     }
 
     @Override
     public String toString() {
-        return "Student{"
-                + "name='" + name + '\''
-                + ", group='" + group + '\''
-                + ", course=" + course
-                + ", grades=" + gradesBySubject
-                + ", average=" + String.format("%.2f", getAverageGrade())
-                + '}';
+        return lastName;
     }
 }

@@ -9,9 +9,9 @@ public class Lesson6Task02 {
     public static void main(String[] args) {
         PhoneBook phoneBook = new PhoneBook();
 
-        phoneBook.add("Иванов", "+375-29-111-22-33");
-        phoneBook.add("Петров", "+375-33-222-33-44");
-        phoneBook.add("Иванов", "+375-44-444-55-66");
+        phoneBook.add("Иванов", "+375 (29) 765-18-42");
+        phoneBook.add("Петров", "+375 (33) 642-07-55");
+        phoneBook.add("Иванов", "+375 (44) 728-90-31");
 
         System.out.println("Телефоны Ивановых: " + phoneBook.get("Иванов"));
         System.out.println("Телефоны Петровых: " + phoneBook.get("Петров"));

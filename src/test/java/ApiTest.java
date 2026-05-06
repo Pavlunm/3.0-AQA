@@ -6,10 +6,12 @@ import static io.restassured.RestAssured.given;
 import static org.hamcrest.Matchers.equalTo;
 
 class ApiTest {
-
+    private static final String BASE_URL = "https://postman-echo.com";
+    private static final String REQUEST_BODY = "{\"name\":\"Pavel\",\"course\":\"AQA\"}";
+    
     @Test
     void getMethod() {
-        RestAssured.baseURI = "https://postman-echo.com";
+        RestAssured.baseURI = BASE_URL;
 
         given()
                 .queryParam("name", "Pavel")
@@ -24,13 +26,11 @@ class ApiTest {
 
     @Test
     void postMethod() {
-        RestAssured.baseURI = "https://postman-echo.com";
-
-        String body = "{\"name\":\"Pavel\",\"course\":\"AQA\"}";
+        RestAssured.baseURI = BASE_URL;
 
         given()
                 .contentType(ContentType.JSON)
-                .body(body)
+                .body(REQUEST_BODY)
         .when()
                 .post("/post")
         .then()
@@ -41,13 +41,11 @@ class ApiTest {
 
     @Test
     void putMethod() {
-        RestAssured.baseURI = "https://postman-echo.com";
-
-        String body = "{\"name\":\"Pavel\",\"course\":\"AQA\"}";
+        RestAssured.baseURI = BASE_URL;
 
         given()
                 .contentType(ContentType.JSON)
-                .body(body)
+                .body(REQUEST_BODY)
         .when()
                 .put("/put")
         .then()
@@ -58,13 +56,11 @@ class ApiTest {
 
     @Test
     void patchMethod() {
-        RestAssured.baseURI = "https://postman-echo.com";
-
-        String body = "{\"name\":\"Pavel\",\"course\":\"AQA\"}";
+        RestAssured.baseURI = BASE_URL;
 
         given()
                 .contentType(ContentType.JSON)
-                .body(body)
+                .body(REQUEST_BODY)
         .when()
                 .patch("/patch")
         .then()
@@ -75,7 +71,7 @@ class ApiTest {
 
     @Test
     void deleteMethod() {
-        RestAssured.baseURI = "https://postman-echo.com";
+        RestAssured.baseURI = BASE_URL;
 
         given()
                 .queryParam("name", "Pavel")

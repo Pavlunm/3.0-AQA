@@ -28,11 +28,13 @@ class UiTest {
         final By BLOCK_TITLE = By.xpath("//section[contains(@class, 'pay')]//h2");
         final By PAYMENT_LOGOS = By.xpath("//div[contains(@class, 'pay__partners')]//img");
         final By DETAILS_LINK = By.xpath("//section[contains(@class, 'pay')]//a[contains(text(), 'Подробнее о сервисе')]");
-        final By PHONE_INPUT = By.id("connection-phone");
-        final By AMOUNT_INPUT = By.id("connection-sum");
-        final By EMAIL_INPUT = By.id("connection-email");
+        final By PHONE_INPUT = By.xpath("//*[@id='connection-phone']");
+        final By AMOUNT_INPUT = By.xpath("//*[@id='connection-sum']");
+        final By EMAIL_INPUT = By.xpath("//*[@id='connection-email']");
         final By CONTINUE_BUTTON = By.xpath("//form[@id='pay-connection']//button[contains(text(), 'Продолжить')]");
-        final By PAYMENT_FRAME = By.cssSelector("iframe.bepaid-iframe, iframe[src*='bepaid'], iframe[src*='payment']");
+        final By PAYMENT_FRAME = By.xpath(
+                "//iframe[contains(@class, 'bepaid-iframe') or contains(@src, 'bepaid') or contains(@src, 'payment')]"
+        );
 
         // Принять cookie, если появилось всплывающее окно
         acceptCookies();

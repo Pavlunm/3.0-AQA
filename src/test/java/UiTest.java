@@ -36,10 +36,8 @@ class UiTest {
                 "//iframe[contains(@class, 'bepaid-iframe') or contains(@src, 'bepaid') or contains(@src, 'payment')]"
         );
 
-        // Принять cookie, если появилось всплывающее окно
         acceptCookies();
 
-        // 1. Проверить название блока «Онлайн пополнение без комиссии»
         WebElement blockTitle = wait.until(ExpectedConditions.visibilityOfElementLocated(BLOCK_TITLE));
         scrollToElement(blockTitle);
 
@@ -50,7 +48,6 @@ class UiTest {
                 "Block title is incorrect"
         );
 
-        // 2. Проверить наличие логотипов платёжных систем
         List<WebElement> paymentLogos = driver.findElements(PAYMENT_LOGOS);
         Assertions.assertEquals(5, paymentLogos.size(), "Payment systems logos count is incorrect");
 
@@ -60,7 +57,6 @@ class UiTest {
         Assertions.assertTrue(hasLogo(paymentLogos, "MasterCard Secure Code"), "MasterCard Secure Code logo is missing");
         Assertions.assertTrue(hasLogo(paymentLogos, "Белкарт"), "Belkart logo is missing");
 
-        // 3. Проверить работу ссылки «Подробнее о сервисе»
         WebElement detailsLink = wait.until(ExpectedConditions.elementToBeClickable(DETAILS_LINK));
         Assertions.assertEquals("Подробнее о сервисе", detailsLink.getText(), "Details link text is incorrect");
         Assertions.assertTrue(
@@ -72,7 +68,6 @@ class UiTest {
         driver.navigate().back();
         wait.until(ExpectedConditions.visibilityOfElementLocated(BLOCK_TITLE));
 
-        // 4. Заполнить поля для варианта «Услуги связи» и проверить работу кнопки «Продолжить»
         driver.findElement(PHONE_INPUT).sendKeys("297777777");
         driver.findElement(AMOUNT_INPUT).sendKeys("10");
         driver.findElement(EMAIL_INPUT).sendKeys("test@test.com");

@@ -6,7 +6,7 @@
         <sourceOutputDir name="target/generated-sources/annotations" />
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
-        <module name="3.0 AQA" />
+        <module name="3.0_AQA" />
         <module name="aqa-3-0" />
       </profile>
     </annotationProcessing>

@@ -1,9 +1,8 @@
-package MTSTest;
+package driver;
 
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
-
 import java.time.Duration;
 
 public class DriverManager {
@@ -16,7 +15,7 @@ public class DriverManager {
             options.addArguments("--disable-notifications");
             options.addArguments("--start-maximized");
             driver = new ChromeDriver(options);
-            driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(4));
+            driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(10));
         }
         return driver;
     }

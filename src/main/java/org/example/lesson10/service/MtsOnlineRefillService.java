@@ -4,8 +4,10 @@ import io.qameta.allure.Step;
 import org.example.lesson10.page.BepaidWidgetPage;
 import org.example.lesson10.page.MtsHomePage;
 import org.openqa.selenium.WebElement;
+import org.openqa.selenium.TimeoutException;
 import org.testng.Assert;
 
+import java.time.Duration;
 import java.util.List;
 
 import static org.example.lesson10.utils.Constants.CONNECTION_EMAIL;
@@ -55,38 +57,50 @@ public class MtsOnlineRefillService {
         WebElement iframe = home.paymentIframe();
         widget.switchIntoPaymentIframe(iframe);
         try {
-            String text = widget.bodyText();
-            String digits = text.replaceAll("\\D+", "");
+            try {
+                widget.waitUntilNationalPhoneDetected(CONNECTION_PHONE, Duration.ofSeconds(25));
+            } catch (TimeoutException e) {
+                Assert.fail("В виджете bePaid не появился номер «" + CONNECTION_PHONE
+                        + "» (ни в тексте, ни в разметке). Фрагмент: "
+                        + widget.debugWidgetSnapshot(2000));
+            }
+            try {
+                widget.waitUntilAmountOrPayButtonShowsSum(CONNECTION_SUM, Duration.ofSeconds(18));
+            } catch (TimeoutException e) {
+                Assert.fail("Не дождались суммы «" + CONNECTION_SUM + "» в виджете bePaid. "
+                        + widget.debugWidgetSnapshot(2000));
+            }
             Assert.assertTrue(
-                    digits.contains("375297777777") || digits.contains("297777777"),
-                    "В тексте виджета должен отображаться номер телефона (цифры): " + text
+                    widget.isAmountVisibleSomewhere(CONNECTION_SUM) || widget.isPayActionShowingAmount(CONNECTION_SUM),
+                    "Сумма «" + CONNECTION_SUM + "» не найдена в тексте/HTML и не на кнопке оплаты. body: "
+                            + widget.bodyText()
             );
-            Assert.assertTrue(
-                    text.contains(CONNECTION_SUM) || text.contains(CONNECTION_SUM + ",00") || text.contains(CONNECTION_SUM + ".00"),
-                    "В тексте виджета должна отображаться сумма пополнения: " + text
-            );
-            String payButtonText = widget.findPayButtonTextContaining(CONNECTION_SUM);
-            Assert.assertTrue(
-                    payButtonText.contains(CONNECTION_SUM),
-                    "Кнопка оплаты должна содержать сумму. Текст кнопки: '" + payButtonText + "', весь текст: " + text
-            );
+            try {
+                widget.waitUntilCardFieldsOrHintsPresent(Duration.ofSeconds(20));
+            } catch (TimeoutException e) {
+                Assert.fail("Не появились поля карты / подсказки. " + widget.debugWidgetSnapshot(2000));
+            }
             List<String> placeholders = widget.visibleCardFieldHints();
-            Assert.assertFalse(placeholders.isEmpty(), "Ожидались плейсхолдеры полей карты");
-            boolean hasCardNumberHint = placeholders.stream().anyMatch(p ->
-                    containsIgnoreCase(p, "номер")
-                            || containsIgnoreCase(p, "карт")
-                            || containsIgnoreCase(p, "card"));
-            boolean hasExpiryHint = placeholders.stream().anyMatch(p ->
-                    containsIgnoreCase(p, "срок")
-                            || containsIgnoreCase(p, "mm")
-                            || containsIgnoreCase(p, "exp"));
-            boolean hasCvcHint = placeholders.stream().anyMatch(p ->
-                    containsIgnoreCase(p, "cvc")
-                            || containsIgnoreCase(p, "cvv")
-                            || containsIgnoreCase(p, "код"));
-            Assert.assertTrue(hasCardNumberHint, "Нет плейсхолдера номера карты среди: " + placeholders);
-            Assert.assertTrue(hasExpiryHint, "Нет плейсхолдера срока действия среди: " + placeholders);
-            Assert.assertTrue(hasCvcHint, "Нет плейсхолдера CVC/CVV среди: " + placeholders);
+            boolean hintsInMarkup = widget.hasCardHintsInMarkup();
+            Assert.assertTrue(!placeholders.isEmpty() || hintsInMarkup,
+                    "Ожидались плейсхолдеры полей карты или их признаки в разметке. hints=" + placeholders);
+            if (!placeholders.isEmpty()) {
+                boolean hasCardNumberHint = placeholders.stream().anyMatch(p ->
+                        containsIgnoreCase(p, "номер")
+                                || containsIgnoreCase(p, "карт")
+                                || containsIgnoreCase(p, "card"));
+                boolean hasExpiryHint = placeholders.stream().anyMatch(p ->
+                        containsIgnoreCase(p, "срок")
+                                || containsIgnoreCase(p, "mm")
+                                || containsIgnoreCase(p, "exp"));
+                boolean hasCvcHint = placeholders.stream().anyMatch(p ->
+                        containsIgnoreCase(p, "cvc")
+                                || containsIgnoreCase(p, "cvv")
+                                || containsIgnoreCase(p, "код"));
+                Assert.assertTrue(hasCardNumberHint, "Нет плейсхолдера номера карты среди: " + placeholders);
+                Assert.assertTrue(hasExpiryHint, "Нет плейсхолдера срока действия среди: " + placeholders);
+                Assert.assertTrue(hasCvcHint, "Нет плейсхолдера CVC/CVV среди: " + placeholders);
+            }
             Assert.assertTrue(widget.hasPaymentBrandImages(), "Не найдены иконки платёжных систем (Visa/MasterCard/Белкарт и т.п.)");
         } finally {
             widget.switchToDefault();

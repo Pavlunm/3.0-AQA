@@ -1,11 +1,12 @@
 package org.example.lesson10.page;
 
 import org.openqa.selenium.By;
+import org.openqa.selenium.JavascriptExecutor;
+import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
 import org.openqa.selenium.support.PageFactory;
 import org.openqa.selenium.support.ui.ExpectedConditions;
-import org.openqa.selenium.support.ui.Select;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
 import java.time.Duration;
@@ -19,9 +20,6 @@ public class MtsHomePage extends BasePage {
 
     @FindBy(xpath = "//div[contains(@class,'pay__partners')]//img")
     private List<WebElement> partnerLogos;
-
-    @FindBy(id = "pay")
-    private WebElement paymentKindSelect;
 
     public MtsHomePage() {
         PageFactory.initElements(driver, this);
@@ -63,9 +61,49 @@ public class MtsHomePage extends BasePage {
     }
 
     public MtsHomePage selectPaymentVariant(String visibleOptionText) {
-        wait.until(ExpectedConditions.elementToBeClickable(paymentKindSelect));
-        new Select(paymentKindSelect).selectByVisibleText(visibleOptionText);
+        String formId = formIdForVariant(visibleOptionText);
+        String firstFieldId = firstInputIdForForm(formId);
+
+        wait.until(ExpectedConditions.presenceOfElementLocated(By.id("pay")));
+        WebElement select = driver.findElement(By.id("pay"));
+        ((JavascriptExecutor) driver).executeScript(
+                "const el = arguments[0]; const text = arguments[1];"
+                        + "for (let i = 0; i < el.options.length; i++) {"
+                        + "  if (el.options[i].textContent.trim() === text) { el.selectedIndex = i; break; }"
+                        + "}"
+                        + "el.dispatchEvent(new Event('change', { bubbles: true }));"
+                        + "el.dispatchEvent(new Event('input', { bubbles: true }));",
+                select,
+                visibleOptionText);
+
+        try {
+            new WebDriverWait(driver, Duration.ofSeconds(5))
+                    .until(ExpectedConditions.visibilityOfElementLocated(By.id(firstFieldId)));
+        } catch (TimeoutException e) {
+            openCustomPayDropdownAndChoose(visibleOptionText);
+            wait.until(ExpectedConditions.visibilityOfElementLocated(By.id(firstFieldId)));
+        }
         return this;
+    }
+
+    private void openCustomPayDropdownAndChoose(String visibleOptionText) {
+        WebElement header = wait.until(ExpectedConditions.elementToBeClickable(
+                By.xpath("//div[@id='pay-section']//button[contains(@class,'select__header')]")));
+        header.click();
+        String optionXpath = "//div[@id='pay-section']//ul[contains(@class,'select__list')]"
+                + "//li[contains(normalize-space(.), \"" + visibleOptionText + "\")]";
+        WebElement option = wait.until(ExpectedConditions.elementToBeClickable(By.xpath(optionXpath)));
+        option.click();
+    }
+
+    private static String firstInputIdForForm(String formId) {
+        return switch (formId) {
+            case "pay-connection" -> "connection-phone";
+            case "pay-internet" -> "internet-phone";
+            case "pay-instalment" -> "score-instalment";
+            case "pay-arrears" -> "score-arrears";
+            default -> throw new IllegalArgumentException("Unknown form: " + formId);
+        };
     }
 
     public List<String> placeholdersOfVisibleForm(String formId) {

@@ -3,7 +3,7 @@
 <suite name="lesson10" verbose="1">
     <test name="mts-online-refill">
         <classes>
-            <class name="org.example.lesson10.OnlineRefillUiTest"/>
+            <class name="org.example.lesson10.OnlineRefillUITest"/>
         </classes>
     </test>
 </suite>

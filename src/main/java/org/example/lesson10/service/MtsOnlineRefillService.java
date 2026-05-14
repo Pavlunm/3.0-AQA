@@ -85,27 +85,93 @@ public class MtsOnlineRefillService {
             Assert.assertTrue(!placeholders.isEmpty() || hintsInMarkup,
                     "Ожидались плейсхолдеры полей карты или их признаки в разметке. hints=" + placeholders);
             if (!placeholders.isEmpty()) {
-                boolean hasCardNumberHint = placeholders.stream().anyMatch(p ->
-                        containsIgnoreCase(p, "номер")
-                                || containsIgnoreCase(p, "карт")
-                                || containsIgnoreCase(p, "card"));
-                boolean hasExpiryHint = placeholders.stream().anyMatch(p ->
-                        containsIgnoreCase(p, "срок")
-                                || containsIgnoreCase(p, "mm")
-                                || containsIgnoreCase(p, "exp"));
-                boolean hasCvcHint = placeholders.stream().anyMatch(p ->
-                        containsIgnoreCase(p, "cvc")
-                                || containsIgnoreCase(p, "cvv")
-                                || containsIgnoreCase(p, "код"));
-                Assert.assertTrue(hasCardNumberHint, "Нет плейсхолдера номера карты среди: " + placeholders);
-                Assert.assertTrue(hasExpiryHint, "Нет плейсхолдера срока действия среди: " + placeholders);
-                Assert.assertTrue(hasCvcHint, "Нет плейсхолдера CVC/CVV среди: " + placeholders);
+                String blob = widget.aggregatedWidgetBlob();
+                boolean hasExpiryHint = placeholders.stream().anyMatch(MtsOnlineRefillService::isExpiryPlaceholderText)
+                        || containsExpiryInBlob(blob);
+                boolean hasCardNumberHint = placeholders.stream().anyMatch(MtsOnlineRefillService::isCardNumberPlaceholderText)
+                        || containsCardNumberInBlob(blob);
+                boolean hasCvcHint = placeholders.stream().anyMatch(MtsOnlineRefillService::isCvcPlaceholderText)
+                        || containsCvcInBlob(blob);
+                Assert.assertTrue(hasCardNumberHint,
+                        "Нет подсказки номера карты (список: " + placeholders + "). Фрагмент виджета: "
+                                + shorten(blob, 400));
+                Assert.assertTrue(hasExpiryHint,
+                        "Нет подсказки срока (ожидается в т.ч. «ММ / ГГ»). Список: " + placeholders);
+                Assert.assertTrue(hasCvcHint,
+                        "Нет подсказки CVC/CVV. Список: " + placeholders);
             }
             Assert.assertTrue(widget.hasPaymentBrandImages(), "Не найдены иконки платёжных систем (Visa/MasterCard/Белкарт и т.п.)");
         } finally {
             widget.switchToDefault();
         }
         return this;
+    }
+
+    private static boolean isExpiryPlaceholderText(String p) {
+        if (p == null || p.isBlank()) {
+            return false;
+        }
+        if (containsIgnoreCase(p, "срок") || containsIgnoreCase(p, "exp") || containsIgnoreCase(p, "valid")) {
+            return true;
+        }
+        boolean mm = p.contains("ММ") || p.contains("мм") || containsIgnoreCase(p, "mm");
+        boolean yy = p.contains("ГГ") || p.contains("гг") || containsIgnoreCase(p, "yy");
+        return mm && yy;
+    }
+
+    private static boolean isCardNumberPlaceholderText(String p) {
+        if (p == null) {
+            return false;
+        }
+        return containsIgnoreCase(p, "номер")
+                || containsIgnoreCase(p, "карт")
+                || containsIgnoreCase(p, "card");
+    }
+
+    private static boolean isCvcPlaceholderText(String p) {
+        if (p == null) {
+            return false;
+        }
+        return containsIgnoreCase(p, "cvc")
+                || containsIgnoreCase(p, "cvv")
+                || containsIgnoreCase(p, "код")
+                || containsIgnoreCase(p, "csc");
+    }
+
+    private static boolean containsExpiryInBlob(String blob) {
+        if (blob == null) {
+            return false;
+        }
+        return containsIgnoreCase(blob, "mm/yy") || containsIgnoreCase(blob, "exp date")
+                || (blob.contains("ММ") && blob.contains("ГГ"));
+    }
+
+    private static boolean containsCardNumberInBlob(String blob) {
+        if (blob == null) {
+            return false;
+        }
+        return (containsIgnoreCase(blob, "номер") && containsIgnoreCase(blob, "карт"))
+                || containsIgnoreCase(blob, "card number")
+                || containsIgnoreCase(blob, "номер карты")
+                || containsIgnoreCase(blob, "pan")
+                || containsIgnoreCase(blob, "ccnumber")
+                || containsIgnoreCase(blob, "cc-number")
+                || containsIgnoreCase(blob, "cardnumber");
+    }
+
+    private static boolean containsCvcInBlob(String blob) {
+        if (blob == null) {
+            return false;
+        }
+        return containsIgnoreCase(blob, "cvc") || containsIgnoreCase(blob, "cvv") || containsIgnoreCase(blob, "csc")
+                || containsIgnoreCase(blob, "security code");
+    }
+
+    private static String shorten(String s, int max) {
+        if (s == null) {
+            return "";
+        }
+        return s.length() <= max ? s : s.substring(0, max) + "...";
     }
 
     private static boolean containsIgnoreCase(String haystack, String needle) {

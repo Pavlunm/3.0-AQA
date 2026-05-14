@@ -30,9 +30,6 @@ public class BepaidWidgetPage extends BasePage {
         return this;
     }
 
-    /**
-     * Виджет bePaid иногда вкладывает checkout во второй iframe; при «пустом» body пробуем зайти глубже.
-     */
     private void drillIntoNestedIframeIfShallowBody(int maxDepth) {
         for (int i = 0; i < maxDepth; i++) {
             if (!isShallowBodyText()) {
@@ -126,7 +123,6 @@ public class BepaidWidgetPage extends BasePage {
         return ps.length() <= maxChars ? ps : ps.substring(0, maxChars);
     }
 
-    /** Текст виджета + HTML (обрезанный) — сумма/заказ часто только в разметке, не в getText(). */
     public String aggregatedWidgetBlob() {
         return bodyTextQuick() + "\n" + documentInnerText() + "\n" + truncatedPageSource(300_000);
     }
@@ -167,7 +163,6 @@ public class BepaidWidgetPage extends BasePage {
                 .until(driver -> isAmountVisibleSomewhere(amount) || isPayActionShowingAmount(amount));
     }
 
-    /** Поля карты в bePaid могут быть без placeholder в input; ждём появления подсказок или типичных меток в DOM. */
     public void waitUntilCardFieldsOrHintsPresent(Duration timeout) {
         new WebDriverWait(rootDriver, timeout)
                 .ignoring(StaleElementReferenceException.class)
@@ -233,9 +228,6 @@ public class BepaidWidgetPage extends BasePage {
         return out;
     }
 
-    /**
-     * Hosted fields иногда не считаются «displayed», но имеют размер или placeholder в DOM.
-     */
     private boolean isPotentiallyInteractableField(WebElement el) {
         try {
             if (el.isDisplayed()) {

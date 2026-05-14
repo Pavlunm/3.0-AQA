@@ -7,9 +7,6 @@ import org.openqa.selenium.support.ui.WebDriverWait;
 import java.time.Duration;
 import java.util.function.BooleanSupplier;
 
-/**
- * Явные ожидания (как в примере lesson_9).
- */
 public final class Waiter {
 
     private Waiter() {

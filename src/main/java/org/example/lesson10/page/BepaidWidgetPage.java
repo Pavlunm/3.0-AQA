@@ -10,9 +10,6 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-/**
- * Только фрейм bePaid и чтение DOM — без бизнес-проверок (они в {@link org.example.lesson10.service.MtsOnlineRefillService}).
- */
 public class BepaidWidgetPage extends BasePage {
 
     private static final int NESTED_IFRAME_DEPTH = 2;

@@ -11,7 +11,7 @@ public final class Constants {
 
     public static final String CONNECTION_PHONE = "297777777";
     public static final String CONNECTION_SUM = "10";
-    public static final String CONNECTION_EMAIL = "test@example.com";
+    public static final String CONNECTION_EMAIL = "test@test.com";
 
     public static final Map<String, List<String>> EXPECTED_PLACEHOLDERS_BY_VARIANT = Map.of(
             "Услуги связи", List.of("Номер телефона", "Сумма", "E-mail для отправки чека"),

@@ -9,7 +9,7 @@ public abstract class BaseTest {
     protected MtsOnlineRefillService mtsOnlineRefillService;
 
     @BeforeMethod
-    public void startBrowser() {
+    public void startTests() {
         mtsOnlineRefillService = new MtsOnlineRefillService();
     }
 

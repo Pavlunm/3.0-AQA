@@ -8,14 +8,13 @@
     <artifactId>lesson10-mts-aqa</artifactId>
     <version>1.0-SNAPSHOT</version>
     <name>lesson10-mts-aqa</name>
+
     <properties>
-        <maven.compiler.source>17</maven.compiler.source>
-        <maven.compiler.target>17</maven.compiler.target>
+        <maven.compiler.release>17</maven.compiler.release>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <selenium.version>4.28.1</selenium.version>
         <testng.version>7.10.2</testng.version>
         <wdm.version>5.9.2</wdm.version>
-        <allure.version>2.29.1</allure.version>
     </properties>
 
     <dependencies>
@@ -34,17 +33,6 @@
             <artifactId>webdrivermanager</artifactId>
             <version>${wdm.version}</version>
         </dependency>
-        <dependency>
-            <groupId>io.qameta.allure</groupId>
-            <artifactId>allure-java-commons</artifactId>
-            <version>${allure.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>io.qameta.allure</groupId>
-            <artifactId>allure-testng</artifactId>
-            <version>${allure.version}</version>
-            <scope>test</scope>
-        </dependency>
     </dependencies>
 
     <build>
@@ -54,7 +42,7 @@
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>3.13.0</version>
                 <configuration>
-                    <release>17</release>
+                    <release>${maven.compiler.release}</release>
                 </configuration>
             </plugin>
             <plugin>

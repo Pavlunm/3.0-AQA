@@ -21,6 +21,18 @@ public class MtsHomePage extends BasePage {
     @FindBy(xpath = "//div[contains(@class,'pay__partners')]//img")
     private List<WebElement> partnerLogos;
 
+    @FindBy(id = "connection-phone")
+    private WebElement connectionPhone;
+
+    @FindBy(id = "connection-sum")
+    private WebElement connectionSum;
+
+    @FindBy(id = "connection-email")
+    private WebElement connectionEmail;
+
+    @FindBy(xpath = "//form[@id='pay-connection']//button[@type='submit' and contains(.,'Продолжить')]")
+    private WebElement continueConnectionButton;
+
     public MtsHomePage() {
         PageFactory.initElements(driver, this);
     }
@@ -55,7 +67,7 @@ public class MtsHomePage extends BasePage {
 
     public MtsHomePage scrollToPayBlock() {
         wait.until(ExpectedConditions.visibilityOf(payBlockTitle));
-        ((org.openqa.selenium.JavascriptExecutor) driver).executeScript(
+        ((JavascriptExecutor) driver).executeScript(
                 "arguments[0].scrollIntoView({block:'center'});", payBlockTitle);
         return this;
     }
@@ -109,9 +121,7 @@ public class MtsHomePage extends BasePage {
     public List<String> placeholdersOfVisibleForm(String formId) {
         By formLocator = By.xpath("//form[@id='" + formId + "']");
         wait.until(ExpectedConditions.visibilityOfElementLocated(formLocator));
-        List<WebElement> inputs = driver.findElements(
-                By.xpath("//form[@id='" + formId + "']//input[@placeholder]"));
-        return inputs.stream()
+        return driver.findElements(By.xpath("//form[@id='" + formId + "']//input[@placeholder]")).stream()
                 .filter(WebElement::isDisplayed)
                 .map(input -> input.getAttribute("placeholder"))
                 .collect(Collectors.toList());
@@ -128,19 +138,18 @@ public class MtsHomePage extends BasePage {
     }
 
     public MtsHomePage fillConnectionService(String phone, String sum, String email) {
-        wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("connection-phone"))).clear();
-        driver.findElement(By.id("connection-phone")).sendKeys(phone);
-        driver.findElement(By.id("connection-sum")).clear();
-        driver.findElement(By.id("connection-sum")).sendKeys(sum);
-        driver.findElement(By.id("connection-email")).clear();
-        driver.findElement(By.id("connection-email")).sendKeys(email);
+        wait.until(ExpectedConditions.visibilityOf(connectionPhone));
+        connectionPhone.clear();
+        connectionPhone.sendKeys(phone);
+        connectionSum.clear();
+        connectionSum.sendKeys(sum);
+        connectionEmail.clear();
+        connectionEmail.sendKeys(email);
         return this;
     }
 
     public MtsHomePage clickContinueOnConnectionForm() {
-        WebElement button = wait.until(ExpectedConditions.elementToBeClickable(
-                By.xpath("//form[@id='pay-connection']//button[@type='submit' and contains(.,'Продолжить')]")));
-        button.click();
+        wait.until(ExpectedConditions.elementToBeClickable(continueConnectionButton)).click();
         return this;
     }
 

@@ -1,263 +1,152 @@
 package org.example.lesson10.page;
 
-import org.example.lesson10.DriverManager;
 import org.openqa.selenium.By;
 import org.openqa.selenium.JavascriptExecutor;
-import org.openqa.selenium.StaleElementReferenceException;
-import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.ExpectedConditions;
-import org.openqa.selenium.support.ui.WebDriverWait;
 
-import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
-import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+/**
+ * Только фрейм bePaid и чтение DOM — без бизнес-проверок (они в {@link org.example.lesson10.service.MtsOnlineRefillService}).
+ */
 public class BepaidWidgetPage extends BasePage {
 
-    private static final int SHALLOW_BODY_THRESHOLD = 40;
-
-    private final WebDriver rootDriver = DriverManager.getDriver();
+    private static final int NESTED_IFRAME_DEPTH = 2;
+    private static final int SHALLOW_BODY_LEN = 40;
+    private static final int PAGE_SNIP = 300_000;
 
     public BepaidWidgetPage switchIntoPaymentIframe(WebElement iframe) {
-        rootDriver.switchTo().defaultContent();
+        driver.switchTo().defaultContent();
         wait.until(ExpectedConditions.frameToBeAvailableAndSwitchToIt(iframe));
-        drillIntoNestedIframeIfShallowBody(2);
+        drillNestedIfNeeded();
         return this;
     }
 
-    private void drillIntoNestedIframeIfShallowBody(int maxDepth) {
-        for (int i = 0; i < maxDepth; i++) {
-            if (!isShallowBodyText()) {
+    public void switchToDefault() {
+        driver.switchTo().defaultContent();
+    }
+
+    public String bodyText() {
+        wait.until(ExpectedConditions.presenceOfElementLocated(By.tagName("body")));
+        return driver.findElement(By.tagName("body")).getText().replace("\n", " ");
+    }
+
+    /** Текст страницы + обрезанный HTML — для поиска телефона/суммы/подписей в сервисе. */
+    public String textAndHtmlSnippet() {
+        return visibleText() + "\n" + snip(pageSource(), PAGE_SNIP);
+    }
+
+    public String visibleTextDebug(int maxChars) {
+        String s = visibleText();
+        return s.length() <= maxChars ? s : s.substring(0, maxChars) + "...";
+    }
+
+    public List<String> inputHintTexts() {
+        List<String> out = new ArrayList<>();
+        for (By locator : new By[]{
+                By.cssSelector("input:not([type='hidden']):not([type='submit'])"),
+                By.cssSelector("textarea"),
+                By.xpath("//*[@placeholder and not(self::script)]"),
+                By.cssSelector("[data-placeholder]")
+        }) {
+            for (WebElement el : driver.findElements(locator)) {
+                if (!usableField(el)) {
+                    continue;
+                }
+                Stream.of(
+                        el.getAttribute("placeholder"),
+                        el.getAttribute("aria-label"),
+                        el.getAttribute("title"),
+                        el.getAttribute("data-placeholder")
+                ).filter(v -> v != null && !v.isBlank()).forEach(out::add);
+            }
+        }
+        return out.stream().map(String::trim).filter(s -> !s.isEmpty()).distinct().collect(Collectors.toList());
+    }
+
+    public boolean hasPaymentLogoImages() {
+        String html = pageSource().toLowerCase();
+        if (html.contains("visa") && (html.contains("master") || html.contains("mastercard"))
+                || html.contains("belkart") || html.contains("белкарт")) {
+            return true;
+        }
+        return driver.findElements(By.cssSelector("img")).stream()
+                .filter(WebElement::isDisplayed)
+                .map(img -> nz(img.getAttribute("alt")) + nz(img.getAttribute("src")))
+                .map(String::toLowerCase)
+                .filter(s -> s.contains("visa") || s.contains("master") || s.contains("belkart")
+                        || s.contains("belcard") || s.contains("mir"))
+                .count() >= 2;
+    }
+
+    private void drillNestedIfNeeded() {
+        for (int i = 0; i < NESTED_IFRAME_DEPTH; i++) {
+            if (!shallowBody()) {
                 return;
             }
-            List<WebElement> inner = rootDriver.findElements(By.cssSelector("iframe"));
+            List<WebElement> inner = driver.findElements(By.cssSelector("iframe"));
             if (inner.isEmpty()) {
                 return;
             }
             try {
-                rootDriver.switchTo().frame(inner.get(0));
+                driver.switchTo().frame(inner.get(0));
             } catch (Exception e) {
                 return;
             }
         }
     }
 
-    private boolean isShallowBodyText() {
+    private boolean shallowBody() {
         try {
-            String t = rootDriver.findElement(By.tagName("body")).getText();
-            return t == null || t.replaceAll("\\s+", "").length() < SHALLOW_BODY_THRESHOLD;
+            String t = driver.findElement(By.tagName("body")).getText();
+            return t == null || t.replaceAll("\\s+", "").length() < SHALLOW_BODY_LEN;
         } catch (Exception e) {
             return true;
         }
     }
 
-    public void waitUntilNationalPhoneDetected(String nationalDigits, Duration timeout) {
-        new WebDriverWait(rootDriver, timeout)
-                .ignoring(StaleElementReferenceException.class)
-                .until(driver -> isNationalPhoneVisibleSomewhere(nationalDigits));
-    }
-
-    public boolean isNationalPhoneVisibleSomewhere(String nationalDigits) {
-        String visible = bodyTextQuick() + "\n" + documentInnerText();
-        String src = safePageSource();
-        if (visible.contains(nationalDigits) || src.contains(nationalDigits)) {
-            return true;
-        }
-        String digits = digitsOnly(visible + src);
-        if (digits.contains(nationalDigits)) {
-            return true;
-        }
-        if (digits.contains("375" + nationalDigits)) {
-            return true;
-        }
-        if (nationalDigits != null && nationalDigits.length() > 1) {
-            if (digits.contains("802" + nationalDigits.substring(1))) {
-                return true;
-            }
-        }
-        return digits.contains("80" + nationalDigits);
-    }
-
-    public String debugWidgetSnapshot(int maxChars) {
-        String chunk = bodyTextQuick() + "\n--- innerText ---\n" + documentInnerText();
-        if (chunk.length() > maxChars) {
-            return chunk.substring(0, maxChars) + "...";
-        }
-        return chunk;
-    }
-
-    private String bodyTextQuick() {
+    private String visibleText() {
         try {
-            return rootDriver.findElement(By.tagName("body")).getText().replace("\n", " ");
-        } catch (Exception e) {
-            return "";
-        }
-    }
-
-    private String documentInnerText() {
-        try {
-            Object o = ((JavascriptExecutor) rootDriver).executeScript(
+            String body = driver.findElement(By.tagName("body")).getText().replace("\n", " ");
+            Object o = ((JavascriptExecutor) driver).executeScript(
                     "return document.documentElement && document.documentElement.innerText"
                             + " ? document.documentElement.innerText : '';");
-            return o != null ? o.toString() : "";
+            String doc = o != null ? o.toString() : "";
+            return body + "\n" + doc;
         } catch (Exception e) {
             return "";
         }
     }
 
-    private String safePageSource() {
+    private String pageSource() {
         try {
-            return rootDriver.getPageSource();
+            return driver.getPageSource();
         } catch (Exception e) {
             return "";
         }
     }
 
-    private String truncatedPageSource(int maxChars) {
-        String ps = safePageSource();
-        return ps.length() <= maxChars ? ps : ps.substring(0, maxChars);
+    private static String snip(String s, int max) {
+        return s.length() <= max ? s : s.substring(0, max);
     }
 
-    public String aggregatedWidgetBlob() {
-        return bodyTextQuick() + "\n" + documentInnerText() + "\n" + truncatedPageSource(300_000);
-    }
-
-    public boolean isAmountVisibleSomewhere(String amount) {
-        if (amount == null || amount.isBlank()) {
-            return false;
-        }
-        String blob = aggregatedWidgetBlob();
-        if (blob.contains(amount + ",00") || blob.contains(amount + ".00")) {
-            return true;
-        }
-        String lower = blob.toLowerCase();
-        if (blob.contains(amount + " BYN")
-                || blob.contains(amount + "\u00a0BYN")
-                || lower.contains(amount + " br")
-                || blob.contains(amount + " руб")) {
-            return true;
-        }
-        return Pattern.compile("(^|\\D)" + Pattern.quote(amount) + "(\\D|$)").matcher(blob).find();
-    }
-
-    public boolean isPayActionShowingAmount(String amount) {
-        return rootDriver.findElements(By.cssSelector("button, input[type='submit'], [role='button']")).stream()
-                .filter(WebElement::isDisplayed)
-                .anyMatch(btn -> {
-                    String pack = textOrEmpty(btn.getText()) + " "
-                            + textOrEmpty(btn.getAttribute("value")) + " "
-                            + textOrEmpty(btn.getAttribute("aria-label")) + " "
-                            + textOrEmpty(btn.getAttribute("title"));
-                    return pack.contains(amount);
-                });
-    }
-
-    public void waitUntilAmountOrPayButtonShowsSum(String amount, Duration timeout) {
-        new WebDriverWait(rootDriver, timeout)
-                .ignoring(StaleElementReferenceException.class)
-                .until(driver -> isAmountVisibleSomewhere(amount) || isPayActionShowingAmount(amount));
-    }
-
-    public void waitUntilCardFieldsOrHintsPresent(Duration timeout) {
-        new WebDriverWait(rootDriver, timeout)
-                .ignoring(StaleElementReferenceException.class)
-                .until(driver -> !visibleCardFieldHints().isEmpty() || cardHintsPresentInMarkup());
-    }
-
-    private boolean cardHintsPresentInMarkup() {
-        String low = aggregatedWidgetBlob().toLowerCase();
-        boolean secret = low.contains("cvc") || low.contains("cvv") || low.contains("security code")
-                || low.contains("csc") || low.contains("код");
-        boolean cardish = low.contains("card") || low.contains("карт") || low.contains("number")
-                || low.contains("pan") || low.contains("номер");
-        boolean expiry = low.contains("exp") || low.contains("mm/") || low.contains("/yy")
-                || low.contains("срок") || low.contains("valid");
-        return secret && (cardish || expiry);
-    }
-
-    public boolean hasCardHintsInMarkup() {
-        return cardHintsPresentInMarkup();
-    }
-
-    private static String textOrEmpty(String s) {
+    private static String nz(String s) {
         return s != null ? s : "";
     }
 
-    private static String digitsOnly(String s) {
-        return s.replaceAll("\\D+", "");
-    }
-
-    public void switchToDefault() {
-        rootDriver.switchTo().defaultContent();
-    }
-
-    public String bodyText() {
-        WebDriverWait iframeWait = new WebDriverWait(rootDriver, Duration.ofSeconds(25));
-        iframeWait.until(ExpectedConditions.presenceOfElementLocated(By.tagName("body")));
-        return rootDriver.findElement(By.tagName("body")).getText().replace("\n", " ");
-    }
-
-    public List<String> visibleCardFieldHints() {
-        List<String> hints = new ArrayList<>();
-        hints.addAll(collectFieldHints(By.cssSelector("input:not([type='hidden']):not([type='submit'])")));
-        hints.addAll(collectFieldHints(By.cssSelector("textarea")));
-        hints.addAll(collectFieldHints(By.xpath("//*[@placeholder and not(self::script)]")));
-        hints.addAll(collectFieldHints(By.cssSelector("[data-placeholder]")));
-        return hints.stream().filter(Objects::nonNull).map(String::trim).filter(s -> !s.isEmpty()).distinct()
-                .collect(Collectors.toList());
-    }
-
-    private List<String> collectFieldHints(By locator) {
-        List<String> out = new ArrayList<>();
-        for (WebElement el : rootDriver.findElements(locator)) {
-            if (!isPotentiallyInteractableField(el)) {
-                continue;
-            }
-            Stream.of(
-                    el.getAttribute("placeholder"),
-                    el.getAttribute("aria-label"),
-                    el.getAttribute("title"),
-                    el.getAttribute("data-placeholder")
-            ).filter(v -> v != null && !v.isBlank()).forEach(out::add);
-        }
-        return out;
-    }
-
-    private boolean isPotentiallyInteractableField(WebElement el) {
+    private static boolean usableField(WebElement el) {
         try {
             if (el.isDisplayed()) {
                 return true;
             }
             String ph = el.getAttribute("placeholder");
-            if (ph != null && !ph.isBlank()) {
-                org.openqa.selenium.Rectangle r = el.getRect();
-                return r.getWidth() > 0 && r.getHeight() > 0;
-            }
-        } catch (Exception ignored) {
+            return ph != null && !ph.isBlank() && el.getRect().getWidth() > 0 && el.getRect().getHeight() > 0;
+        } catch (Exception e) {
+            return false;
         }
-        return false;
-    }
-
-    public boolean hasPaymentBrandImages() {
-        String page = rootDriver.getPageSource().toLowerCase();
-        boolean textMatch = page.contains("visa") && (page.contains("master") || page.contains("mastercard"))
-                || page.contains("belkart") || page.contains("белкарт");
-        List<WebElement> imgs = rootDriver.findElements(By.cssSelector("img"));
-        long hits = imgs.stream()
-                .filter(WebElement::isDisplayed)
-                .map(img -> (img.getAttribute("alt") + " " + img.getAttribute("src")).toLowerCase())
-                .filter(s -> s.contains("visa")
-                        || s.contains("master")
-                        || s.contains("belcard")
-                        || s.contains("belkart")
-                        || s.contains("mir")
-                        || s.contains("maestro"))
-                .count();
-        return hits >= 2 || textMatch;
     }
 }

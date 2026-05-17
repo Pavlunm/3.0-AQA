@@ -13,7 +13,7 @@ public final class Waiter {
     }
 
     public static void waitElementToBeInvisible(WebElement element) {
-        new WebDriverWait(DriverManager.getDriver(), Duration.ofSeconds(10))
+        new WebDriverWait(DriverManager.getDriver(), Duration.ofSeconds(5))
                 .until(ExpectedConditions.invisibilityOf(element));
     }
 }

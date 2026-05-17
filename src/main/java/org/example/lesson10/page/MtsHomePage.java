@@ -2,18 +2,25 @@ package org.example.lesson10.page;
 
 import org.example.lesson10.utils.Waiter;
 import org.openqa.selenium.By;
+import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.interactions.Actions;
 import org.openqa.selenium.support.FindBy;
 import org.openqa.selenium.support.PageFactory;
 import org.openqa.selenium.support.ui.ExpectedConditions;
-import org.openqa.selenium.support.ui.Select;
+import org.openqa.selenium.support.ui.WebDriverWait;
 
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 
 public class MtsHomePage extends BasePage {
+
+    private final WebDriverWait shortWait = new WebDriverWait(driver, Duration.ofSeconds(5));
+
+    @FindBy(xpath = "//section[contains(@class,'pay')]")
+    private WebElement payBlock;
 
     @FindBy(xpath = "//section[contains(@class,'pay')]//h2")
     private WebElement payBlockTitle;
@@ -32,9 +39,6 @@ public class MtsHomePage extends BasePage {
 
     @FindBy(xpath = "//form[@id='pay-connection']//button[@type='submit' and contains(.,'Продолжить')]")
     private WebElement continueConnectionButton;
-
-    @FindBy(xpath = "//select[@id='pay']")
-    private WebElement payVariantSelect;
 
     public MtsHomePage() {
         PageFactory.initElements(driver, this);
@@ -71,39 +75,58 @@ public class MtsHomePage extends BasePage {
     }
 
     public MtsHomePage scrollToPayBlock() {
-        wait.until(ExpectedConditions.visibilityOf(payBlockTitle));
-        new Actions(driver).moveToElement(payBlockTitle).perform();
+        scrollPayBlockToCenter();
         return this;
+    }
+
+    private void scrollPayBlockToCenter() {
+        wait.until(ExpectedConditions.visibilityOf(payBlock));
+        ((JavascriptExecutor) driver).executeScript(
+                "arguments[0].scrollIntoView({block:'center', inline:'nearest'});", payBlock);
     }
 
     public MtsHomePage selectPaymentVariant(String visibleOptionText) {
-        String formId = formIdForVariant(visibleOptionText);
-        String formXpath = "//form[@id='" + formId + "']";
+        String firstFieldXpath = firstFieldXpathForVariant(visibleOptionText);
+        scrollPayBlockToCenter();
 
+        chooseVariantInPaySelect(visibleOptionText);
         try {
-            wait.until(ExpectedConditions.visibilityOf(payVariantSelect));
-            new Select(payVariantSelect).selectByVisibleText(visibleOptionText);
+            shortWait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath(firstFieldXpath)));
         } catch (TimeoutException e) {
             openCustomPayDropdownAndChoose(visibleOptionText);
+            wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath(firstFieldXpath)));
         }
-        wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath(formXpath)));
         return this;
     }
 
+    private void chooseVariantInPaySelect(String visibleOptionText) {
+        WebElement paySelect = wait.until(ExpectedConditions.presenceOfElementLocated(
+                By.xpath("//select[@id='pay']")));
+        ((JavascriptExecutor) driver).executeScript(
+                "var el = arguments[0]; var text = arguments[1];"
+                        + "for (var i = 0; i < el.options.length; i++) {"
+                        + "  if (el.options[i].textContent.trim() === text) { el.selectedIndex = i; break; }"
+                        + "}"
+                        + "el.dispatchEvent(new Event('change', { bubbles: true }));",
+                paySelect,
+                visibleOptionText);
+    }
+
     private void openCustomPayDropdownAndChoose(String visibleOptionText) {
-        WebElement header = wait.until(ExpectedConditions.elementToBeClickable(
+        WebElement header = shortWait.until(ExpectedConditions.elementToBeClickable(
                 By.xpath("//div[@id='pay-section']//button[contains(@class,'select__header')]")));
-        header.click();
+        new Actions(driver).moveToElement(header).click().perform();
+
         String optionXpath = "//div[@id='pay-section']//ul[contains(@class,'select__list')]"
-                + "//li[contains(normalize-space(.), \"" + visibleOptionText + "\")]";
-        WebElement option = wait.until(ExpectedConditions.elementToBeClickable(By.xpath(optionXpath)));
-        option.click();
+                + "//li[contains(@class,'select__item')][contains(normalize-space(.),'"
+                + visibleOptionText + "')]";
+        WebElement option = shortWait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath(optionXpath)));
+        new Actions(driver).moveToElement(option).click().perform();
     }
 
     public List<String> placeholdersOfVisibleForm(String formId) {
-        String formXpath = "//form[@id='" + formId + "']";
-        String inputsXpath = formXpath + "//input[@placeholder]";
-        wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath(formXpath)));
+        String inputsXpath = "//form[@id='" + formId + "']//input[@placeholder]";
+        shortWait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath(inputsXpath)));
         List<WebElement> inputs = driver.findElements(By.xpath(inputsXpath));
         List<String> placeholders = new ArrayList<>();
         for (WebElement input : inputs) {
@@ -126,6 +149,22 @@ public class MtsHomePage extends BasePage {
         }
         if ("Задолженность".equals(visibleOptionText)) {
             return "pay-arrears";
+        }
+        throw new IllegalArgumentException("Unknown variant: " + visibleOptionText);
+    }
+
+    private String firstFieldXpathForVariant(String visibleOptionText) {
+        if ("Услуги связи".equals(visibleOptionText)) {
+            return "//input[@id='connection-phone']";
+        }
+        if ("Домашний интернет".equals(visibleOptionText)) {
+            return "//input[@id='internet-phone']";
+        }
+        if ("Рассрочка".equals(visibleOptionText)) {
+            return "//input[@id='score-instalment']";
+        }
+        if ("Задолженность".equals(visibleOptionText)) {
+            return "//input[@id='score-arrears']";
         }
         throw new IllegalArgumentException("Unknown variant: " + visibleOptionText);
     }

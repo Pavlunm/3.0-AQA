@@ -86,22 +86,10 @@ public class MtsOnlineRefillService {
     }
 
     private void assertCardPlaceholders() {
-        List<String> placeholders = bepaid.inputPlaceholders();
-        Assert.assertFalse(placeholders.isEmpty(), "Ожидались подсказки полей карты (placeholder)");
-
-        boolean hasCardNumber = false;
-        boolean hasCvc = false;
-        for (String placeholder : placeholders) {
-            if (placeholder.contains("карт") || placeholder.contains("Карт")
-                    || placeholder.contains("card") || placeholder.contains("номер") || placeholder.contains("Номер")) {
-                hasCardNumber = true;
-            }
-            if (placeholder.contains("cvc") || placeholder.contains("CVC")
-                    || placeholder.contains("cvv") || placeholder.contains("CVV") || placeholder.contains("код")) {
-                hasCvc = true;
-            }
-        }
-        Assert.assertTrue(hasCardNumber, "Нет подсказки номера карты. placeholders=" + placeholders);
-        Assert.assertTrue(hasCvc, "Нет подсказки CVC/CVV. placeholders=" + placeholders);
+        List<String> hints = bepaid.inputHints();
+        Assert.assertFalse(hints.isEmpty(), "Ожидались поля карты");
+        Assert.assertTrue(bepaid.hasExpiryHint(), "Нет поля срока (ММ / ГГ). hints=" + hints);
+        Assert.assertTrue(bepaid.hasCardNumberHint(), "Нет поля номера карты. hints=" + hints);
+        Assert.assertTrue(bepaid.hasCvcHint(), "Нет поля CVC/CVV. hints=" + hints);
     }
 }

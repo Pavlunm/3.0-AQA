@@ -225,9 +225,12 @@ public class MtsHomePage extends BasePage {
         wait.until(ExpectedConditions.or(
                 ExpectedConditions.urlContains("checkout"),
                 ExpectedConditions.urlContains("payment"),
-                ExpectedConditions.presenceOfElementLocated(By.xpath(
-                        "//iframe[contains(@class,'bepaid-iframe') or contains(@src,'bepaid') or contains(@src,'payment')]"))));
+                ExpectedConditions.presenceOfElementLocated(paymentIframeXpath())));
         return this;
+    }
+
+    private By paymentIframeXpath() {
+        return By.xpath("//iframe[contains(@class,'bepaid-iframe') or contains(@src,'bepaid') or contains(@src,'payment')]");
     }
 
     public WebElement paymentIframe() {

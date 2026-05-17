@@ -1,7 +1,7 @@
 package org.example.lesson11;
 
 import io.qameta.allure.Allure;
-import org.example.lesson11.service.MtsOnlineRefillService;
+import org.example.lesson11.service.MtsHomePageService;
 import org.openqa.selenium.OutputType;
 import org.openqa.selenium.TakesScreenshot;
 import org.openqa.selenium.WebDriver;
@@ -13,11 +13,11 @@ import java.io.ByteArrayInputStream;
 
 public abstract class BaseTest {
 
-    protected MtsOnlineRefillService mtsOnlineRefillService;
+    protected MtsHomePageService mtsHomePageService;
 
     @BeforeMethod
-    public void startTests() {
-        mtsOnlineRefillService = new MtsOnlineRefillService();
+    public void setUp() {
+        mtsHomePageService = new MtsHomePageService();
     }
 
     @AfterMethod(alwaysRun = true)

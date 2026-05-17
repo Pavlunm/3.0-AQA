@@ -6,7 +6,7 @@
     </listeners>
     <test name="mts-online-refill">
         <classes>
-            <class name="org.example.lesson11.OnlineRefillUITest"/>
+            <class name="org.example.lesson11.UiTest"/>
         </classes>
     </test>
 </suite>

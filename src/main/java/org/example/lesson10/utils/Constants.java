@@ -7,6 +7,18 @@ public final class Constants {
 
     public static final String MTS_HOME_URL = "https://www.mts.by/";
 
+    public static final String PAY_BLOCK_TITLE = "Онлайн пополнение без комиссии";
+    public static final List<String> EXPECTED_PARTNER_LOGO_ALTS = List.of(
+            "Visa",
+            "Verified By Visa",
+            "MasterCard",
+            "MasterCard Secure Code",
+            "Белкарт"
+    );
+    public static final String DETAILS_LINK_TEXT = "Подробнее о сервисе";
+    public static final String DETAILS_LINK_URL_PART =
+            "/help/poryadok-oplaty-i-bezopasnost-internet-platezhey/";
+
     public static final String CONNECTION_PHONE = "297777777";
     public static final String CONNECTION_SUM = "10";
     public static final String CONNECTION_EMAIL = "test@test.com";

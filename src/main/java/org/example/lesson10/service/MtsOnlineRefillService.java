@@ -10,9 +10,13 @@ import java.util.List;
 import static org.example.lesson10.utils.Constants.CONNECTION_EMAIL;
 import static org.example.lesson10.utils.Constants.CONNECTION_PHONE;
 import static org.example.lesson10.utils.Constants.CONNECTION_SUM;
+import static org.example.lesson10.utils.Constants.DETAILS_LINK_TEXT;
+import static org.example.lesson10.utils.Constants.DETAILS_LINK_URL_PART;
 import static org.example.lesson10.utils.Constants.EXPECTED_CARD_FIELD_HINTS;
+import static org.example.lesson10.utils.Constants.EXPECTED_PARTNER_LOGO_ALTS;
 import static org.example.lesson10.utils.Constants.EXPECTED_PLACEHOLDERS_BY_VARIANT;
 import static org.example.lesson10.utils.Constants.MTS_HOME_URL;
+import static org.example.lesson10.utils.Constants.PAY_BLOCK_TITLE;
 
 public class MtsOnlineRefillService {
 
@@ -21,6 +25,33 @@ public class MtsOnlineRefillService {
 
     public MtsOnlineRefillService openHomeAcceptCookiesAndScrollToPay() {
         home.open(MTS_HOME_URL).acceptCookiesIfVisible().scrollToPayBlock();
+        return this;
+    }
+
+    public MtsOnlineRefillService assertLesson9PayBlockChecks() {
+        Assert.assertEquals(
+                PAY_BLOCK_TITLE,
+                home.payBlockTitleTextNormalized(),
+                "Название блока «Онлайн пополнение без комиссии»");
+
+        List<String> logoAlts = home.partnerLogoAlts();
+        Assert.assertEquals(EXPECTED_PARTNER_LOGO_ALTS.size(), logoAlts.size(),
+                "Количество логотипов платёжных систем");
+        for (String expectedAlt : EXPECTED_PARTNER_LOGO_ALTS) {
+            Assert.assertTrue(logoAlts.contains(expectedAlt),
+                    "Нет логотипа с alt «" + expectedAlt + "». Найдено: " + logoAlts);
+        }
+
+        Assert.assertEquals(DETAILS_LINK_TEXT, home.detailsLinkText(),
+                "Текст ссылки «Подробнее о сервисе»");
+        Assert.assertTrue(home.detailsLinkHref().contains(DETAILS_LINK_URL_PART),
+                "Некорректный URL ссылки «Подробнее о сервисе»");
+        home.clickDetailsAboutServiceLink()
+                .waitDetailsHelpPageOpened(DETAILS_LINK_URL_PART)
+                .navigateBackToHomePage()
+                .waitPayBlockTitleVisible()
+                .scrollToPayBlock();
+
         return this;
     }
 
@@ -36,6 +67,7 @@ public class MtsOnlineRefillService {
         home.selectPaymentVariant("Услуги связи");
         home.fillConnectionService(CONNECTION_PHONE, CONNECTION_SUM, CONNECTION_EMAIL);
         home.clickContinueOnConnectionForm();
+        home.waitPaymentFlowStarted();
         return this;
     }
 

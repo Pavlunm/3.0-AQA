@@ -22,6 +22,15 @@ public class MtsHomePage extends BasePage {
     @FindBy(xpath = "//section[contains(@class,'pay')]")
     private WebElement payBlock;
 
+    @FindBy(xpath = "//section[contains(@class,'pay')]//h2")
+    private WebElement payBlockTitle;
+
+    @FindBy(xpath = "//div[contains(@class,'pay__partners')]//img")
+    private List<WebElement> partnerLogos;
+
+    @FindBy(xpath = "//section[contains(@class,'pay')]//a[contains(normalize-space(.),'Подробнее о сервисе')]")
+    private WebElement detailsAboutServiceLink;
+
     @FindBy(xpath = "//input[@id='connection-phone']")
     private WebElement connectionPhone;
 
@@ -51,6 +60,50 @@ public class MtsHomePage extends BasePage {
             cookieButton.click();
             Waiter.waitElementToBeInvisible(cookieButton);
         }
+        return this;
+    }
+
+    public String payBlockTitleTextNormalized() {
+        wait.until(ExpectedConditions.visibilityOf(payBlockTitle));
+        return payBlockTitle.getText().replace("\n", " ").trim();
+    }
+
+    public List<String> partnerLogoAlts() {
+        wait.until(ExpectedConditions.visibilityOfAllElements(partnerLogos));
+        List<String> alts = new ArrayList<>();
+        for (WebElement logo : partnerLogos) {
+            alts.add(logo.getAttribute("alt"));
+        }
+        return alts;
+    }
+
+    public String detailsLinkText() {
+        wait.until(ExpectedConditions.visibilityOf(detailsAboutServiceLink));
+        return detailsAboutServiceLink.getText().trim();
+    }
+
+    public String detailsLinkHref() {
+        wait.until(ExpectedConditions.visibilityOf(detailsAboutServiceLink));
+        return detailsAboutServiceLink.getAttribute("href");
+    }
+
+    public MtsHomePage clickDetailsAboutServiceLink() {
+        wait.until(ExpectedConditions.elementToBeClickable(detailsAboutServiceLink)).click();
+        return this;
+    }
+
+    public MtsHomePage waitDetailsHelpPageOpened(String urlPart) {
+        wait.until(ExpectedConditions.urlContains(urlPart));
+        return this;
+    }
+
+    public MtsHomePage navigateBackToHomePage() {
+        driver.navigate().back();
+        return this;
+    }
+
+    public MtsHomePage waitPayBlockTitleVisible() {
+        wait.until(ExpectedConditions.visibilityOf(payBlockTitle));
         return this;
     }
 
@@ -165,6 +218,15 @@ public class MtsHomePage extends BasePage {
 
     public MtsHomePage clickContinueOnConnectionForm() {
         wait.until(ExpectedConditions.elementToBeClickable(continueConnectionButton)).click();
+        return this;
+    }
+
+    public MtsHomePage waitPaymentFlowStarted() {
+        wait.until(ExpectedConditions.or(
+                ExpectedConditions.urlContains("checkout"),
+                ExpectedConditions.urlContains("payment"),
+                ExpectedConditions.presenceOfElementLocated(By.xpath(
+                        "//iframe[contains(@class,'bepaid-iframe') or contains(@src,'bepaid') or contains(@src,'payment')]"))));
         return this;
     }
 

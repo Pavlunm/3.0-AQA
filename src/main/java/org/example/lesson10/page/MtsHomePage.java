@@ -22,12 +22,6 @@ public class MtsHomePage extends BasePage {
     @FindBy(xpath = "//section[contains(@class,'pay')]")
     private WebElement payBlock;
 
-    @FindBy(xpath = "//section[contains(@class,'pay')]//h2")
-    private WebElement payBlockTitle;
-
-    @FindBy(xpath = "//div[contains(@class,'pay__partners')]//img")
-    private List<WebElement> partnerLogos;
-
     @FindBy(xpath = "//input[@id='connection-phone']")
     private WebElement connectionPhone;
 
@@ -58,20 +52,6 @@ public class MtsHomePage extends BasePage {
             Waiter.waitElementToBeInvisible(cookieButton);
         }
         return this;
-    }
-
-    public String payBlockTitleTextNormalized() {
-        wait.until(ExpectedConditions.visibilityOf(payBlockTitle));
-        return payBlockTitle.getText().replace("\n", " ").trim();
-    }
-
-    public List<String> partnerLogoAlts() {
-        wait.until(ExpectedConditions.visibilityOfAllElements(partnerLogos));
-        List<String> alts = new ArrayList<>();
-        for (WebElement logo : partnerLogos) {
-            alts.add(logo.getAttribute("alt"));
-        }
-        return alts;
     }
 
     public MtsHomePage scrollToPayBlock() {
@@ -117,7 +97,10 @@ public class MtsHomePage extends BasePage {
                 By.xpath("//div[@id='pay-section']//button[contains(@class,'select__header')]")));
         new Actions(driver).moveToElement(header).click().perform();
 
-        String optionXpath = "//div[@id='pay-section']//ul[contains(@class,'select__list')]"
+        String listXpath = "//div[@id='pay-section']//ul[contains(@class,'select__list')]";
+        shortWait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath(listXpath)));
+
+        String optionXpath = listXpath
                 + "//li[contains(@class,'select__item')][contains(normalize-space(.),'"
                 + visibleOptionText + "')]";
         WebElement option = shortWait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath(optionXpath)));

@@ -10,6 +10,7 @@ import java.util.List;
 import static org.example.lesson10.utils.Constants.CONNECTION_EMAIL;
 import static org.example.lesson10.utils.Constants.CONNECTION_PHONE;
 import static org.example.lesson10.utils.Constants.CONNECTION_SUM;
+import static org.example.lesson10.utils.Constants.EXPECTED_CARD_FIELD_HINTS;
 import static org.example.lesson10.utils.Constants.EXPECTED_PLACEHOLDERS_BY_VARIANT;
 import static org.example.lesson10.utils.Constants.MTS_HOME_URL;
 
@@ -17,14 +18,6 @@ public class MtsOnlineRefillService {
 
     private final MtsHomePage home = new MtsHomePage();
     private final BepaidWidgetPage bepaid = new BepaidWidgetPage();
-
-    public String payBlockTitleNormalized() {
-        return home.payBlockTitleTextNormalized();
-    }
-
-    public List<String> partnerLogoAlts() {
-        return home.partnerLogoAlts();
-    }
 
     public MtsOnlineRefillService openHomeAcceptCookiesAndScrollToPay() {
         home.open(MTS_HOME_URL).acceptCookiesIfVisible().scrollToPayBlock();
@@ -50,10 +43,14 @@ public class MtsOnlineRefillService {
         bepaid.switchIntoPaymentIframe(home.paymentIframe());
         try {
             waitUntilPhoneVisible();
-            waitUntilAmountVisible();
-            Assert.assertTrue(bepaid.amountDisplayed(CONNECTION_SUM), "Сумма «" + CONNECTION_SUM + "» на странице оплаты");
+            waitUntilAmountOnPage();
+            Assert.assertTrue(bepaid.amountDisplayedOnPage(CONNECTION_SUM),
+                    "Сумма «" + CONNECTION_SUM + "» на странице оплаты");
+            waitUntilAmountOnButton();
+            Assert.assertTrue(bepaid.amountDisplayedOnPayButton(CONNECTION_SUM),
+                    "Сумма «" + CONNECTION_SUM + "» на кнопке оплаты");
             waitUntilCardFormVisible();
-            assertCardPlaceholders();
+            assertCardFieldHints();
             Assert.assertTrue(bepaid.paymentLogosDisplayed(), "Не найдены иконки платёжных систем");
         } finally {
             bepaid.switchToDefault();
@@ -69,11 +66,19 @@ public class MtsOnlineRefillService {
         }
     }
 
-    private void waitUntilAmountVisible() {
+    private void waitUntilAmountOnPage() {
         try {
-            bepaid.waitUntilAmountVisible(CONNECTION_SUM);
+            bepaid.waitUntilAmountOnPage(CONNECTION_SUM);
         } catch (TimeoutException e) {
-            Assert.fail("Не дождались суммы «" + CONNECTION_SUM + "». " + bepaid.bodyText());
+            Assert.fail("Не дождались суммы на странице «" + CONNECTION_SUM + "». " + bepaid.bodyText());
+        }
+    }
+
+    private void waitUntilAmountOnButton() {
+        try {
+            bepaid.waitUntilAmountOnPayButton(CONNECTION_SUM);
+        } catch (TimeoutException e) {
+            Assert.fail("Не дождались суммы на кнопке «" + CONNECTION_SUM + "». " + bepaid.bodyText());
         }
     }
 
@@ -85,11 +90,13 @@ public class MtsOnlineRefillService {
         }
     }
 
-    private void assertCardPlaceholders() {
-        List<String> hints = bepaid.inputHints();
-        Assert.assertFalse(hints.isEmpty(), "Ожидались поля карты");
-        Assert.assertTrue(bepaid.hasExpiryHint(), "Нет поля срока (ММ / ГГ). hints=" + hints);
-        Assert.assertTrue(bepaid.hasCardNumberHint(), "Нет поля номера карты. hints=" + hints);
-        Assert.assertTrue(bepaid.hasCvcHint(), "Нет поля CVC/CVV. hints=" + hints);
+    private void assertCardFieldHints() {
+        List<String> actual = bepaid.cardFieldHints();
+        Assert.assertFalse(actual.isEmpty(), "Ожидались подсказки полей карты");
+
+        for (String expectedHint : EXPECTED_CARD_FIELD_HINTS) {
+            Assert.assertTrue(bepaid.cardFieldLabelVisible(expectedHint),
+                    "Нет надписи «" + expectedHint + "» у полей карты. hints=" + actual);
+        }
     }
 }

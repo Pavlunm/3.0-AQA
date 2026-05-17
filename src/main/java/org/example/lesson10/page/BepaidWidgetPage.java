@@ -49,7 +49,7 @@ public class BepaidWidgetPage extends BasePage {
         return text.contains(phone) || text.contains("375" + phone);
     }
 
-    public boolean amountDisplayed(String amount) {
+    public boolean amountDisplayedOnPage(String amount) {
         String text = bodyText();
         return text.contains(amount)
                 || text.contains(amount + ",00")
@@ -57,7 +57,24 @@ public class BepaidWidgetPage extends BasePage {
                 || text.contains(amount + " BYN");
     }
 
-    public List<String> inputHints() {
+    public boolean amountDisplayedOnPayButton(String amount) {
+        List<WebElement> buttons = driver.findElements(By.xpath(
+                "//button | //input[@type='submit']"));
+        for (WebElement button : buttons) {
+            if (!button.isDisplayed()) {
+                continue;
+            }
+            String buttonText = readButtonText(button);
+            if (buttonText.contains(amount)
+                    || buttonText.contains(amount + ",00")
+                    || buttonText.contains(amount + ".00")) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public List<String> cardFieldHints() {
         List<String> hints = new ArrayList<>();
         for (WebElement input : cardInputs) {
             if (!input.isDisplayed()) {
@@ -69,39 +86,32 @@ public class BepaidWidgetPage extends BasePage {
         return hints;
     }
 
-    public boolean cardFormDisplayed() {
-        return !inputHints().isEmpty();
-    }
-
-    public boolean hasExpiryHint() {
-        for (String hint : inputHints()) {
-            if (hint.contains("ММ") || hint.contains("ГГ")) {
+    public boolean hintsContain(List<String> hints, String expectedPart) {
+        for (String hint : hints) {
+            if (hint.contains(expectedPart)) {
                 return true;
             }
         }
         return false;
     }
 
-    public boolean hasCardNumberHint() {
-        for (String hint : inputHints()) {
-            if (hint.contains("карт") || hint.contains("Карт")
-                    || hint.contains("card") || hint.contains("номер") || hint.contains("Номер")) {
-                return true;
-            }
+    public boolean cardFieldLabelVisible(String expectedPart) {
+        List<String> hints = cardFieldHints();
+        if (hintsContain(hints, expectedPart)) {
+            return true;
         }
         String text = bodyText();
-        return text.contains("номер") || text.contains("карт") || text.contains("Card");
+        if ("CVC".equals(expectedPart)) {
+            return text.contains("CVC") || text.contains("CVV") || text.contains("cvc") || text.contains("код");
+        }
+        if ("карт".equals(expectedPart)) {
+            return text.contains("карт") || text.contains("Card") || text.contains("номер");
+        }
+        return text.contains(expectedPart);
     }
 
-    public boolean hasCvcHint() {
-        for (String hint : inputHints()) {
-            if (hint.contains("cvc") || hint.contains("CVC")
-                    || hint.contains("cvv") || hint.contains("CVV") || hint.contains("код")) {
-                return true;
-            }
-        }
-        String text = bodyText();
-        return text.contains("CVC") || text.contains("CVV") || text.contains("cvc");
+    public boolean cardFormDisplayed() {
+        return !cardFieldHints().isEmpty();
     }
 
     public boolean paymentLogosDisplayed() {
@@ -138,14 +148,24 @@ public class BepaidWidgetPage extends BasePage {
         throw new TimeoutException("Не дождались номер «" + phone + "»");
     }
 
-    public void waitUntilAmountVisible(String amount) {
+    public void waitUntilAmountOnPage(String amount) {
         for (int i = 0; i < 12; i++) {
-            if (amountDisplayed(amount)) {
+            if (amountDisplayedOnPage(amount)) {
                 return;
             }
             pause();
         }
-        throw new TimeoutException("Не дождались сумму «" + amount + "»");
+        throw new TimeoutException("Не дождались сумму на странице «" + amount + "»");
+    }
+
+    public void waitUntilAmountOnPayButton(String amount) {
+        for (int i = 0; i < 12; i++) {
+            if (amountDisplayedOnPayButton(amount)) {
+                return;
+            }
+            pause();
+        }
+        throw new TimeoutException("Не дождались сумму на кнопке «" + amount + "»");
     }
 
     public void waitUntilCardFormVisible() {
@@ -156,6 +176,22 @@ public class BepaidWidgetPage extends BasePage {
             pause();
         }
         throw new TimeoutException("Не дождались форму карты");
+    }
+
+    private String readButtonText(WebElement button) {
+        String text = button.getText();
+        String value = button.getAttribute("value");
+        String ariaLabel = button.getAttribute("aria-label");
+        if (text == null) {
+            text = "";
+        }
+        if (value == null) {
+            value = "";
+        }
+        if (ariaLabel == null) {
+            ariaLabel = "";
+        }
+        return text + value + ariaLabel;
     }
 
     private void addHint(List<String> hints, String value) {
@@ -185,4 +221,5 @@ public class BepaidWidgetPage extends BasePage {
         } catch (Exception ignored) {
         }
     }
+
 }

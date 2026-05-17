@@ -1,17 +1,17 @@
 package org.example.lesson10.page;
 
+import org.example.lesson10.utils.Waiter;
 import org.openqa.selenium.By;
-import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebElement;
+import org.openqa.selenium.interactions.Actions;
 import org.openqa.selenium.support.FindBy;
 import org.openqa.selenium.support.PageFactory;
 import org.openqa.selenium.support.ui.ExpectedConditions;
-import org.openqa.selenium.support.ui.WebDriverWait;
+import org.openqa.selenium.support.ui.Select;
 
-import java.time.Duration;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 public class MtsHomePage extends BasePage {
 
@@ -21,17 +21,20 @@ public class MtsHomePage extends BasePage {
     @FindBy(xpath = "//div[contains(@class,'pay__partners')]//img")
     private List<WebElement> partnerLogos;
 
-    @FindBy(id = "connection-phone")
+    @FindBy(xpath = "//input[@id='connection-phone']")
     private WebElement connectionPhone;
 
-    @FindBy(id = "connection-sum")
+    @FindBy(xpath = "//input[@id='connection-sum']")
     private WebElement connectionSum;
 
-    @FindBy(id = "connection-email")
+    @FindBy(xpath = "//input[@id='connection-email']")
     private WebElement connectionEmail;
 
     @FindBy(xpath = "//form[@id='pay-connection']//button[@type='submit' and contains(.,'Продолжить')]")
     private WebElement continueConnectionButton;
+
+    @FindBy(xpath = "//select[@id='pay']")
+    private WebElement payVariantSelect;
 
     public MtsHomePage() {
         PageFactory.initElements(driver, this);
@@ -43,14 +46,12 @@ public class MtsHomePage extends BasePage {
     }
 
     public MtsHomePage acceptCookiesIfVisible() {
-        try {
-            WebDriverWait shortWait = new WebDriverWait(driver, Duration.ofSeconds(5));
-            WebElement btn = shortWait.until(ExpectedConditions.elementToBeClickable(
-                    By.xpath("//button[contains(normalize-space(.),'Принять')]")));
-            btn.click();
-            new WebDriverWait(driver, Duration.ofSeconds(10))
-                    .until(ExpectedConditions.invisibilityOf(btn));
-        } catch (Exception ignored) {
+        List<WebElement> cookieButtons = driver.findElements(
+                By.xpath("//button[contains(normalize-space(.),'Принять')]"));
+        if (!cookieButtons.isEmpty()) {
+            WebElement cookieButton = cookieButtons.get(0);
+            cookieButton.click();
+            Waiter.waitElementToBeInvisible(cookieButton);
         }
         return this;
     }
@@ -62,39 +63,30 @@ public class MtsHomePage extends BasePage {
 
     public List<String> partnerLogoAlts() {
         wait.until(ExpectedConditions.visibilityOfAllElements(partnerLogos));
-        return partnerLogos.stream().map(img -> img.getAttribute("alt")).collect(Collectors.toList());
+        List<String> alts = new ArrayList<>();
+        for (WebElement logo : partnerLogos) {
+            alts.add(logo.getAttribute("alt"));
+        }
+        return alts;
     }
 
     public MtsHomePage scrollToPayBlock() {
         wait.until(ExpectedConditions.visibilityOf(payBlockTitle));
-        ((JavascriptExecutor) driver).executeScript(
-                "arguments[0].scrollIntoView({block:'center'});", payBlockTitle);
+        new Actions(driver).moveToElement(payBlockTitle).perform();
         return this;
     }
 
     public MtsHomePage selectPaymentVariant(String visibleOptionText) {
         String formId = formIdForVariant(visibleOptionText);
-        String firstFieldId = firstInputIdForForm(formId);
-
-        wait.until(ExpectedConditions.presenceOfElementLocated(By.id("pay")));
-        WebElement select = driver.findElement(By.id("pay"));
-        ((JavascriptExecutor) driver).executeScript(
-                "const el = arguments[0]; const text = arguments[1];"
-                        + "for (let i = 0; i < el.options.length; i++) {"
-                        + "  if (el.options[i].textContent.trim() === text) { el.selectedIndex = i; break; }"
-                        + "}"
-                        + "el.dispatchEvent(new Event('change', { bubbles: true }));"
-                        + "el.dispatchEvent(new Event('input', { bubbles: true }));",
-                select,
-                visibleOptionText);
+        String formXpath = "//form[@id='" + formId + "']";
 
         try {
-            new WebDriverWait(driver, Duration.ofSeconds(5))
-                    .until(ExpectedConditions.visibilityOfElementLocated(By.id(firstFieldId)));
+            wait.until(ExpectedConditions.visibilityOf(payVariantSelect));
+            new Select(payVariantSelect).selectByVisibleText(visibleOptionText);
         } catch (TimeoutException e) {
             openCustomPayDropdownAndChoose(visibleOptionText);
-            wait.until(ExpectedConditions.visibilityOfElementLocated(By.id(firstFieldId)));
         }
+        wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath(formXpath)));
         return this;
     }
 
@@ -108,33 +100,34 @@ public class MtsHomePage extends BasePage {
         option.click();
     }
 
-    private static String firstInputIdForForm(String formId) {
-        return switch (formId) {
-            case "pay-connection" -> "connection-phone";
-            case "pay-internet" -> "internet-phone";
-            case "pay-instalment" -> "score-instalment";
-            case "pay-arrears" -> "score-arrears";
-            default -> throw new IllegalArgumentException("Unknown form: " + formId);
-        };
-    }
-
     public List<String> placeholdersOfVisibleForm(String formId) {
-        By formLocator = By.xpath("//form[@id='" + formId + "']");
-        wait.until(ExpectedConditions.visibilityOfElementLocated(formLocator));
-        return driver.findElements(By.xpath("//form[@id='" + formId + "']//input[@placeholder]")).stream()
-                .filter(WebElement::isDisplayed)
-                .map(input -> input.getAttribute("placeholder"))
-                .collect(Collectors.toList());
+        String formXpath = "//form[@id='" + formId + "']";
+        String inputsXpath = formXpath + "//input[@placeholder]";
+        wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath(formXpath)));
+        List<WebElement> inputs = driver.findElements(By.xpath(inputsXpath));
+        List<String> placeholders = new ArrayList<>();
+        for (WebElement input : inputs) {
+            if (input.isDisplayed()) {
+                placeholders.add(input.getAttribute("placeholder"));
+            }
+        }
+        return placeholders;
     }
 
     public String formIdForVariant(String visibleOptionText) {
-        return switch (visibleOptionText) {
-            case "Услуги связи" -> "pay-connection";
-            case "Домашний интернет" -> "pay-internet";
-            case "Рассрочка" -> "pay-instalment";
-            case "Задолженность" -> "pay-arrears";
-            default -> throw new IllegalArgumentException("Unknown variant: " + visibleOptionText);
-        };
+        if ("Услуги связи".equals(visibleOptionText)) {
+            return "pay-connection";
+        }
+        if ("Домашний интернет".equals(visibleOptionText)) {
+            return "pay-internet";
+        }
+        if ("Рассрочка".equals(visibleOptionText)) {
+            return "pay-instalment";
+        }
+        if ("Задолженность".equals(visibleOptionText)) {
+            return "pay-arrears";
+        }
+        throw new IllegalArgumentException("Unknown variant: " + visibleOptionText);
     }
 
     public MtsHomePage fillConnectionService(String phone, String sum, String email) {

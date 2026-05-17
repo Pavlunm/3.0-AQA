@@ -1,20 +1,19 @@
 package org.example.lesson10.utils;
 
-import org.openqa.selenium.StaleElementReferenceException;
-import org.openqa.selenium.WebDriver;
+import org.example.lesson10.DriverManager;
+import org.openqa.selenium.WebElement;
+import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
 import java.time.Duration;
-import java.util.function.BooleanSupplier;
 
 public final class Waiter {
 
     private Waiter() {
     }
 
-    public static void untilTrue(WebDriver driver, Duration timeout, BooleanSupplier condition) {
-        new WebDriverWait(driver, timeout)
-                .ignoring(StaleElementReferenceException.class)
-                .until(d -> condition.getAsBoolean());
+    public static void waitElementToBeInvisible(WebElement element) {
+        new WebDriverWait(DriverManager.getDriver(), Duration.ofSeconds(10))
+                .until(ExpectedConditions.invisibilityOf(element));
     }
 }
